@@ -53,7 +53,9 @@ Shader "Unlit/ChromaKeyUnlit"
 					o.vertex = UnityObjectToClipPos(v.vertex);
 					UNITY_TRANSFER_FOG(o,o.vertex);
 
+					o.uv.y = 1 - v.uv.y;
 					o.uv.x = 1 - v.uv.x;
+					
 					return o;
 				}
 

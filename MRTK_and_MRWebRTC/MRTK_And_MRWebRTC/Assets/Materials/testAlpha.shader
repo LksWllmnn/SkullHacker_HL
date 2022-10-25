@@ -52,7 +52,7 @@ Shader "Unlit/testAlpha"
                 o.uv = TRANSFORM_TEX(v.uv, _UPlane);
                 o.uv = TRANSFORM_TEX(v.uv, _VPlane);
                 UNITY_TRANSFER_FOG(o,o.vertex);
-                o.uv.y = 1 - v.uv.y;
+                //o.uv.y = 1 - v.uv.y;
                 o.uv.x = 1 - v.uv.x;
                 return o;
             }
