@@ -16,12 +16,17 @@ public class PCReceiver : MonoBehaviour
     private DataChannel dataObj;
 
     private bool setInputChannel = false;
+    public bool objChannelNotOpenYet = true;
 
     public void CreateChannels()
     {
         pC.Peer.DataChannelAdded += this.OnDataChannelAdded;
-        pC.Peer.AddDataChannelAsync(40, "dummy", false, false).Wait();
-        pC.Peer.AddDataChannelAsync(41, "objChannel", false, false).Wait();
+        Task<DataChannel> dummy = pC.Peer.AddDataChannelAsync(40, "dummy", false, false);
+        dummy.Wait();
+
+
+        Task<DataChannel> objChannel = pC.Peer.AddDataChannelAsync(41, "objChannel", false, false);
+        objChannel.Wait();
     }
 
     private void OnDataChannelAdded(DataChannel channel)
@@ -32,7 +37,6 @@ public class PCReceiver : MonoBehaviour
             case "dummy":
                 dataDummy = channel;
                 dataDummy.StateChanged += this.OnStateChangedDummy;
-                setInputChannel = true;
                 break;
 
             case "objChannel":
@@ -58,7 +62,7 @@ public class PCReceiver : MonoBehaviour
 
         if (dataObj.State == DataChannel.ChannelState.Open)
         {
-            dataDummy.SendMessage(Encoding.ASCII.GetBytes(representationObject.transform.position.ToString("F3")));
+            dataObj.SendMessage(Encoding.ASCII.GetBytes("Hello over there"));
             Debug.Log("Message sended... from Obj");
         }
     }
@@ -73,6 +77,12 @@ public class PCReceiver : MonoBehaviour
             {
                 dataDummy.SendMessage(Encoding.ASCII.GetBytes(cam.transform.rotation.ToString("F3") + "|" + cam.transform.position.ToString("F3")));
             }
+        }
+
+        if (dataObj != null && objChannelNotOpenYet && dataObj.State == DataChannel.ChannelState.Open)
+        {
+            dataObj.SendMessage(Encoding.ASCII.GetBytes(representationObject.transform.position.ToString("F3")));
+            objChannelNotOpenYet = false;
         }
 
         if(setInputChannel)
