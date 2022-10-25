@@ -9,10 +9,11 @@ public class PCReceiver : MonoBehaviour
 {
     public Microsoft.MixedReality.WebRTC.Unity.PeerConnection pC;
     public Camera cam;
+    public GameObject representationObject;
     public InputSender inputSender;
 
     private DataChannel dataDummy;
-    private DataChannel data2;
+    private DataChannel dataObj;
 
     private bool setInputChannel = false;
 
@@ -20,6 +21,7 @@ public class PCReceiver : MonoBehaviour
     {
         pC.Peer.DataChannelAdded += this.OnDataChannelAdded;
         pC.Peer.AddDataChannelAsync(40, "dummy", false, false).Wait();
+        pC.Peer.AddDataChannelAsync(41, "objChannel", false, false).Wait();
     }
 
     private void OnDataChannelAdded(DataChannel channel)
@@ -32,16 +34,32 @@ public class PCReceiver : MonoBehaviour
                 dataDummy.StateChanged += this.OnStateChangedDummy;
                 setInputChannel = true;
                 break;
+
+            case "objChannel":
+                dataObj = channel;
+                dataObj.StateChanged += this.OnStateChangedObj;
+                break;
         }
     }
     private void OnStateChangedDummy()
     {
         Debug.Log("DataDummy: " + dataDummy.State);
 
-        if (dataDummy.State + "" == "Open")
+        if (dataDummy.State == DataChannel.ChannelState.Open)
         {
             dataDummy.SendMessage(Encoding.ASCII.GetBytes("Hello over there... from Dummy"));
             Debug.Log("Message sended... from Dummy");
+        }
+    }
+
+    private void OnStateChangedObj()
+    {
+        Debug.Log("DataObj: " + dataObj.State);
+
+        if (dataObj.State == DataChannel.ChannelState.Open)
+        {
+            dataDummy.SendMessage(Encoding.ASCII.GetBytes(representationObject.transform.position.ToString("F3")));
+            Debug.Log("Message sended... from Obj");
         }
     }
 
@@ -53,7 +71,7 @@ public class PCReceiver : MonoBehaviour
         {
             if (dataDummy.State == DataChannel.ChannelState.Open)
             {
-                dataDummy.SendMessage(Encoding.ASCII.GetBytes(cam.transform.rotation + "|" + cam.transform.position));
+                dataDummy.SendMessage(Encoding.ASCII.GetBytes(cam.transform.rotation.ToString("F3") + "|" + cam.transform.position.ToString("F3")));
             }
         }
 

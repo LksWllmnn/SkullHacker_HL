@@ -19,10 +19,10 @@ public class test : MonoBehaviour
 
     public void testFunk()
     {
-        Task <Microsoft.MixedReality.WebRTC.DataChannel> task0 = pc.getNativePeer().AddDataChannelAsync(69, "testFromOutside", true, true);
+        Task <Microsoft.MixedReality.WebRTC.DataChannel> task0 = pc.Peer.AddDataChannelAsync(69, "testFromOutside", true, true);
         task0.Wait();
 
-        pc.getNativePeer().DataChannelAdded += anotherDataChannelAddedEvent;
+        pc.Peer.DataChannelAdded += anotherDataChannelAddedEvent;
     }
 
     private void anotherDataChannelAddedEvent(DataChannel channel)
