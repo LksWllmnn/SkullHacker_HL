@@ -6,23 +6,24 @@ using Microsoft.MixedReality.WebRTC;
 using PeerConnection = Microsoft.MixedReality.WebRTC.Unity.PeerConnection;
 using System.Text;
 using System;
+using System.Threading.Tasks;
 
 public class DataChannelReceiver : MonoBehaviour
 {
     public PeerConnection pc;
-    private DataChannel data1;
 
+    private DataChannel dataObj;
     private DataChannel dataDummy;
 
     private bool isPeerInitialized = false;
-    private bool isPeerConnected = false;
 
     private bool camRemoting = false;
 
     public Camera cam;
 
-    Quaternion camRotQuadLast;
-    Vector3 camPosVecLast;
+    public Vector3 modelPos;
+    public GameObject model;
+
     Quaternion camRotQuad;
     Vector3 camPosVec;
 
@@ -31,7 +32,11 @@ public class DataChannelReceiver : MonoBehaviour
         pc.Peer.DataChannelAdded += this.OnDataChannelAdded;
         pc.Peer.Connected += this.PeerIsConnected;
 
-        pc.Peer.AddDataChannelAsync(40, "dummy", true, true).Wait();
+        Task<DataChannel> dummy = pc.Peer.AddDataChannelAsync(40, "dummy", false, false);
+        dummy.Wait();
+
+        Task<DataChannel> objChannel = pc.Peer.AddDataChannelAsync(41, "objChannel", false, false);
+        objChannel.Wait();
     }
 
     private void OnDataChannelAdded(DataChannel channel)
@@ -44,10 +49,11 @@ public class DataChannelReceiver : MonoBehaviour
                 dataDummy.StateChanged += this.OnStateChangedDummy;
                 dataDummy.MessageReceived += OnMessageReceived;
                 break;
-            /*case "dataChannel":
-                data1 = channel;
-                data1.StateChanged += this.OnStateChanged1;
-                break;*/
+            case "objChannel":
+                dataObj = channel;
+                dataObj.StateChanged += this.OnStateChanged1;
+                dataObj.MessageReceived += OnMessageReceivedObj;
+                break;
         }
     }
 
@@ -61,36 +67,47 @@ public class DataChannelReceiver : MonoBehaviour
         }
     }
 
-    /*private void OnStateChanged1()
+    private void OnStateChanged1()
     {
-        Debug.Log("Data1: " + data1.State);
+        Debug.Log("Data1: " + dataObj.State);
 
-        if (data1.State + "" == "Open")
+        if (dataObj.State + "" == "Open")
         {
-            camRemoting = true;
+            
         }
-    }*/
+    }
 
     private void PeerIsConnected()
     {
         Debug.Log("Peer is Connected ...lw");
-        isPeerConnected = true;
     }
 
     private void OnMessageReceived(byte[] message)
     {
-        //Debug.Log(Encoding.UTF8.GetString(message));
+       
         string[] camTransString = Encoding.UTF8.GetString(message).Split("|");
 
         try
         {
-            //Debug.Log(camTransString[1]);
             string camRot = camTransString[0];
             string camTrans = camTransString[1];
 
             camRotQuad = StringToQuaternion(camRot);
             camPosVec = StringToVector3(camTrans);
-            Debug.Log(camPosVec);
+        } catch (Exception e)
+        {
+            Debug.Log(e);
+        }
+        
+    }
+
+    private void OnMessageReceivedObj(byte[] message)
+    {
+        Debug.Log(Encoding.UTF8.GetString(message));
+
+        try
+        {
+            modelPos = StringToVector3(Encoding.UTF8.GetString(message));
         } catch (Exception e)
         {
             Debug.Log(e);
@@ -112,6 +129,8 @@ public class DataChannelReceiver : MonoBehaviour
         {
             cam.transform.rotation = camRotQuad;
             cam.transform.position = camPosVec;
+
+            model.transform.position = modelPos;
         }
         
     }
@@ -122,7 +141,7 @@ public class DataChannelReceiver : MonoBehaviour
         if (sVector.StartsWith("(") && sVector.EndsWith(")"))
         {
             sVector = sVector.Substring(1, sVector.Length - 2);
-            Debug.Log("sVector: " + sVector);
+            //Debug.Log("sVector: " + sVector);
         }
 
         // split the items
@@ -130,9 +149,9 @@ public class DataChannelReceiver : MonoBehaviour
 
         // store as a Vector3
         Vector3 result = new Vector3(
-            float.Parse(sArray[0])/10,
-            float.Parse(sArray[1])/10,
-            float.Parse(sArray[2])/10);
+            float.Parse(sArray[0])/1000,
+            float.Parse(sArray[1])/1000,
+            float.Parse(sArray[2])/1000);
 
         return result;
     }

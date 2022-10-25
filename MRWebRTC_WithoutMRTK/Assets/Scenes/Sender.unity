@@ -287,7 +287,7 @@ MonoBehaviour:
   AutoLogErrors: 1
   LocalPeerId: sender
   RemotePeerId: receiver
-  HttpServerAddress: http://127.0.0.1:3000/
+  HttpServerAddress: http://192.168.50.152:3000/
   PollTimeMs: 500
 --- !u!4 &599126880
 Transform:
@@ -868,6 +868,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pc: {fileID: 114452440398351871}
   cam: {fileID: 1221709219}
+  modelPos: {x: 0, y: 0, z: 0}
+  model: {fileID: 1177480102}
 --- !u!1 &1509017149
 GameObject:
   m_ObjectHideFlags: 0
