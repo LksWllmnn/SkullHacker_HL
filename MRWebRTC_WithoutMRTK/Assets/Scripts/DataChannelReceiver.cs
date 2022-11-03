@@ -19,7 +19,7 @@ public class DataChannelReceiver : MonoBehaviour
 
     private bool camRemoting = false;
 
-    public Camera cam;
+    public GameObject head;
 
     public Vector3 modelPos;
     public GameObject model;
@@ -127,8 +127,8 @@ public class DataChannelReceiver : MonoBehaviour
 
         if(camRemoting)
         {
-            cam.transform.rotation = camRotQuad;
-            cam.transform.position = camPosVec;
+            head.transform.rotation = camRotQuad;
+            head.transform.position = camPosVec;
 
             model.transform.position = modelPos;
         }
