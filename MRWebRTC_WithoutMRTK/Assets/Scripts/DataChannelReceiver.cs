@@ -20,6 +20,8 @@ public class DataChannelReceiver : MonoBehaviour
     private bool camRemoting = false;
 
     public GameObject head;
+    public float stereoSeperation = 0.88f;
+    public bool setEyes = false;
 
     public Vector3 modelPos;
     public GameObject model;
@@ -105,9 +107,16 @@ public class DataChannelReceiver : MonoBehaviour
     {
         Debug.Log(Encoding.UTF8.GetString(message));
 
+        string[] messageStrings = Encoding.UTF8.GetString(message).Split("|");
+
         try
         {
-            modelPos = StringToVector3(Encoding.UTF8.GetString(message));
+            modelPos = StringToVector3(messageStrings[0]);
+
+            messageStrings[1].Replace(",", ".");
+            stereoSeperation = float.Parse(messageStrings[1]);
+            setEyes = true;
+            
         } catch (Exception e)
         {
             Debug.Log(e);
@@ -125,12 +134,22 @@ public class DataChannelReceiver : MonoBehaviour
             initPeer();
         }
 
+        if(setEyes)
+        {
+            Vector3 leftEye = new Vector3(-(stereoSeperation / 2), 0, 0);
+            Vector3 rightEye = new Vector3((stereoSeperation / 2), 0, 0);
+            head.transform.GetChild(0).transform.position = leftEye;
+            head.transform.GetChild(1).transform.position = rightEye;
+            setEyes = false;
+        }
+
         if(camRemoting)
         {
             head.transform.rotation = camRotQuad;
             head.transform.position = camPosVec;
 
             model.transform.position = modelPos;
+            
         }
         
     }
