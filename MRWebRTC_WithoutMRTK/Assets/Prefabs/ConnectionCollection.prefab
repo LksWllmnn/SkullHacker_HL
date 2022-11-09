@@ -84,6 +84,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pc: {fileID: 4504632618331161087}
   head: {fileID: 4545599445755601019}
+  stereoSeperation: 0.88
+  setEyes: 0
   modelPos: {x: 0, y: 0, z: 0}
   model: {fileID: 0}
 --- !u!1 &4545599444715521686
@@ -277,7 +279,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 64
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -512,7 +514,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 64
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
