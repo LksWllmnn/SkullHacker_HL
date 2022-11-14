@@ -84,9 +84,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pc: {fileID: 4504632618331161087}
   head: {fileID: 4545599445755601019}
-  stereoSeperation: 0.88
+  stereoSeperation: 0.022
+  eyesAreSet: 0
   setEyes: 0
   modelPos: {x: 0, y: 0, z: 0}
+  modelRot: {x: 0, y: 0, z: 0, w: 0}
+  modelScale: {x: 0, y: 0, z: 0}
   model: {fileID: 0}
 --- !u!1 &4545599444715521686
 GameObject:
@@ -258,7 +261,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 1, b: 0, a: 1}
+  m_BackGroundColor: {r: 1, g: 0.0141509175, b: 0.0141509175, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -493,7 +496,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 1, b: 0, a: 1}
+  m_BackGroundColor: {r: 1, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0

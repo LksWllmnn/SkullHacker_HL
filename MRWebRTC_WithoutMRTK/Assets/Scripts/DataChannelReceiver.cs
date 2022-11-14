@@ -13,21 +13,30 @@ public class DataChannelReceiver : MonoBehaviour
     public PeerConnection pc;
 
     private DataChannel dataObj;
+    private DataChannel dataEye;
     private DataChannel dataDummy;
+    private DataChannel dataBounds;
 
     private bool isPeerInitialized = false;
 
     private bool camRemoting = false;
 
     public GameObject head;
-    public float stereoSeperation = 0.88f;
+    public float stereoSeperation = 0.022f;
+    public bool eyesAreSet = false;
     public bool setEyes = false;
 
+    public bool sendBounds = false;
+
     public Vector3 modelPos;
+    public Quaternion modelRot;
+    public Vector3 modelScale;
     public GameObject model;
 
     Quaternion camRotQuad;
     Vector3 camPosVec;
+
+    private Vector3 modelBounds;
 
     private void initPeer()
     {
@@ -39,6 +48,12 @@ public class DataChannelReceiver : MonoBehaviour
 
         Task<DataChannel> objChannel = pc.Peer.AddDataChannelAsync(41, "objChannel", false, false);
         objChannel.Wait();
+
+        Task<DataChannel> eyeChannel = pc.Peer.AddDataChannelAsync(42, "eyeChannel", false, false);
+        eyeChannel.Wait();
+
+        Task<DataChannel> boundsChannel = pc.Peer.AddDataChannelAsync(43, "boundsChannel", false, false);
+        boundsChannel.Wait();
     }
 
     private void OnDataChannelAdded(DataChannel channel)
@@ -56,6 +71,15 @@ public class DataChannelReceiver : MonoBehaviour
                 dataObj.StateChanged += this.OnStateChanged1;
                 dataObj.MessageReceived += OnMessageReceivedObj;
                 break;
+            case "eyeChannel":
+                dataEye = channel;
+                dataEye.StateChanged += this.OnStateChangedEye;
+                dataEye.MessageReceived += OnMessageReceivedEye;
+                break;
+            case "boundsChannel":
+                dataBounds = channel;
+                dataBounds.StateChanged += this.OnStateChangedBounds;
+                break;
         }
     }
 
@@ -72,10 +96,19 @@ public class DataChannelReceiver : MonoBehaviour
     private void OnStateChanged1()
     {
         Debug.Log("Data1: " + dataObj.State);
+    }
 
-        if (dataObj.State + "" == "Open")
+    private void OnStateChangedEye()
+    {
+        Debug.Log("Data1: " + dataEye.State);
+    }
+
+    private void OnStateChangedBounds()
+    {
+        Debug.Log("Data1: " + dataBounds.State);
+        if(dataBounds.State  == DataChannel.ChannelState.Open)
         {
-            
+            sendBounds = true;
         }
     }
 
@@ -105,23 +138,38 @@ public class DataChannelReceiver : MonoBehaviour
 
     private void OnMessageReceivedObj(byte[] message)
     {
-        Debug.Log(Encoding.UTF8.GetString(message));
 
         string[] messageStrings = Encoding.UTF8.GetString(message).Split("|");
 
         try
         {
             modelPos = StringToVector3(messageStrings[0]);
-
-            messageStrings[1].Replace(",", ".");
-            stereoSeperation = float.Parse(messageStrings[1]);
-            setEyes = true;
+            modelRot = StringToQuaternion(messageStrings[1]);
+            modelScale = StringToVector3(messageStrings[2]);
             
         } catch (Exception e)
         {
             Debug.Log(e);
         }
         
+    }
+
+    private void OnMessageReceivedEye(byte[] message)
+    {
+        //Debug.Log(Encoding.UTF8.GetString(message));
+        //string messageString = Encoding.UTF8.GetString(message);
+
+        try
+        {
+            //messageString.Replace(",", ".");
+            //stereoSeperation = float.Parse(messageString);
+            setEyes = true;
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+        }
+
     }
 
     // Update is called once per frame
@@ -134,22 +182,37 @@ public class DataChannelReceiver : MonoBehaviour
             initPeer();
         }
 
-        if(setEyes)
+        if(setEyes && !eyesAreSet)
         {
-            Vector3 leftEye = new Vector3(-(stereoSeperation / 2), 0, 0);
-            Vector3 rightEye = new Vector3((stereoSeperation / 2), 0, 0);
+            Vector3 leftEye = new Vector3(0, 0, 0);
+            
+            Vector3 rightEye = new Vector3(stereoSeperation, 0, 0);
+            Debug.Log(rightEye);
             head.transform.GetChild(0).transform.position = leftEye;
             head.transform.GetChild(1).transform.position = rightEye;
             setEyes = false;
+            eyesAreSet = true;
         }
 
         if(camRemoting)
         {
             head.transform.rotation = camRotQuad;
             head.transform.position = camPosVec;
+            //head.transform.Translate(new Vector3(0, 0, -0.15f));
 
             model.transform.position = modelPos;
+            model.transform.rotation = modelRot;
+            model.transform.localScale = modelScale;
             
+        }
+        
+
+
+        if(sendBounds)
+        {
+            Debug.Log("Bounds: " + (Matrix4x4.Scale(model.transform.GetChild(0).transform.localScale) * (model.transform.GetChild(0).transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.bounds.extents * 2)).ToString("F3"));
+            dataBounds.SendMessage(Encoding.UTF8.GetBytes((Matrix4x4.Scale(model.transform.GetChild(0).transform.localScale) * (model.transform.GetChild(0).transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.bounds.extents * 2)).ToString("F3")));
+            sendBounds = false;
         }
         
     }
