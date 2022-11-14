@@ -87,6 +87,7 @@ MonoBehaviour:
   stereoSeperation: 0.022
   eyesAreSet: 0
   setEyes: 0
+  sendBounds: 0
   modelPos: {x: 0, y: 0, z: 0}
   modelRot: {x: 0, y: 0, z: 0, w: 0}
   modelScale: {x: 0, y: 0, z: 0}
@@ -261,7 +262,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 1, g: 0.0141509175, b: 0.0141509175, a: 0}
+  m_BackGroundColor: {r: 0, g: 1, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -496,7 +497,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 1, g: 0, b: 0, a: 0}
+  m_BackGroundColor: {r: 0, g: 1, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
