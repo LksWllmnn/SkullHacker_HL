@@ -16,6 +16,7 @@ public class DataChannelReceiver : MonoBehaviour
     private DataChannel dataEye;
     private DataChannel dataDummy;
     private DataChannel dataBounds;
+    private DataChannel dataVelo;
 
     private bool isPeerInitialized = false;
 
@@ -23,6 +24,7 @@ public class DataChannelReceiver : MonoBehaviour
 
     public GameObject head;
     public float stereoSeperation = 0.022f;
+    public float calcSep;
     public bool eyesAreSet = false;
     public bool setEyes = false;
 
@@ -36,7 +38,8 @@ public class DataChannelReceiver : MonoBehaviour
     Quaternion camRotQuad;
     Vector3 camPosVec;
 
-    private Vector3 modelBounds;
+    Vector3 modelVelocity;
+
 
     private void initPeer()
     {
@@ -54,6 +57,9 @@ public class DataChannelReceiver : MonoBehaviour
 
         Task<DataChannel> boundsChannel = pc.Peer.AddDataChannelAsync(43, "boundsChannel", false, false);
         boundsChannel.Wait();
+
+        Task<DataChannel> veloChannel = pc.Peer.AddDataChannelAsync(44, "veloChannel", false, false);
+        veloChannel.Wait();
     }
 
     private void OnDataChannelAdded(DataChannel channel)
@@ -79,6 +85,11 @@ public class DataChannelReceiver : MonoBehaviour
             case "boundsChannel":
                 dataBounds = channel;
                 dataBounds.StateChanged += this.OnStateChangedBounds;
+                break;
+            case "veloChannel":
+                dataVelo = channel;
+                dataVelo.StateChanged += this.OnStateChangedVelo;
+                dataVelo.MessageReceived += OnMessageReceivedVelo;
                 break;
         }
     }
@@ -110,6 +121,11 @@ public class DataChannelReceiver : MonoBehaviour
         {
             sendBounds = true;
         }
+    }
+
+    private void OnStateChangedVelo()
+    {
+        Debug.Log("Velo: " + dataVelo.State);
     }
 
     private void PeerIsConnected()
@@ -172,6 +188,20 @@ public class DataChannelReceiver : MonoBehaviour
 
     }
 
+    private void OnMessageReceivedVelo(byte[] message)
+    {
+        try
+        {
+            Debug.Log("HeadVelo: " + Encoding.UTF8.GetString(message));
+            modelVelocity = StringToVector3(Encoding.UTF8.GetString(message));
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+        }
+
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -182,14 +212,15 @@ public class DataChannelReceiver : MonoBehaviour
             initPeer();
         }
 
-        if(setEyes && !eyesAreSet)
+        if(setEyes)
         {
+            calcSep = -0.1f * Vector3.Distance(model.transform.position,head.transform.position) + 0.08f;
             Vector3 leftEye = new Vector3(0, 0, 0);
             
-            Vector3 rightEye = new Vector3(stereoSeperation, 0, 0);
+            Vector3 rightEye = new Vector3(calcSep, 0, 0);
             Debug.Log(rightEye);
-            head.transform.GetChild(0).transform.position = leftEye;
-            head.transform.GetChild(1).transform.position = rightEye;
+            head.transform.GetChild(0).transform.localPosition = leftEye;
+            head.transform.GetChild(1).transform.localPosition = rightEye;
             setEyes = false;
             eyesAreSet = true;
         }
@@ -203,7 +234,6 @@ public class DataChannelReceiver : MonoBehaviour
             model.transform.position = modelPos;
             model.transform.rotation = modelRot;
             model.transform.localScale = modelScale;
-            
         }
         
 
