@@ -7,6 +7,7 @@ using System.Text;
 using UnityEngine.XR.OpenXR;
 using Microsoft.MixedReality.Toolkit.XRSDK.OpenXR;
 using System;
+using Microsoft.MixedReality.Toolkit.Input;
 
 public class PCReceiver : MonoBehaviour
 {
@@ -18,6 +19,7 @@ public class PCReceiver : MonoBehaviour
     private DataChannel dataObj;
     private DataChannel dataEye;
     private DataChannel dataBounds;
+    private DataChannel dataVelo;
 
     private bool setBounds;
     private Vector3 bounds;
@@ -39,6 +41,9 @@ public class PCReceiver : MonoBehaviour
 
         Task<DataChannel> boundsChannel = pC.Peer.AddDataChannelAsync(43, "boundsChannel", false, false);
         boundsChannel.Wait();
+
+        Task<DataChannel> veloChannel = pC.Peer.AddDataChannelAsync(44, "veloChannel", false, false);
+        veloChannel.Wait();
     }
 
     private void OnDataChannelAdded(DataChannel channel)
@@ -63,6 +68,10 @@ public class PCReceiver : MonoBehaviour
                 dataBounds = channel;
                 dataBounds.StateChanged += this.OnStateChangedBounds;
                 dataBounds.MessageReceived += this.MessageReceivedBounds;
+                break;
+            case "veloChannel":
+                dataVelo = channel;
+                dataVelo.StateChanged += this.OnStateChangedVelo;
                 break;
         }
     }
@@ -97,6 +106,11 @@ public class PCReceiver : MonoBehaviour
         Debug.Log("DataBounds: " + dataBounds.State);
     }
 
+    private void OnStateChangedVelo()
+    {
+        Debug.Log("DataVelo: " + dataVelo.State);
+    }
+
     private void MessageReceivedBounds(byte[] message)
     {
         string m = Encoding.UTF8.GetString(message); 
@@ -113,7 +127,6 @@ public class PCReceiver : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         
         if (dataDummy != null && dataDummy.State == DataChannel.ChannelState.Open)
         {
@@ -130,7 +143,12 @@ public class PCReceiver : MonoBehaviour
             dataEye.SendMessage(Encoding.ASCII.GetBytes("" + cam.stereoSeparation));
         }
 
-        if(setBounds)
+        if (dataVelo != null && dataVelo.State == DataChannel.ChannelState.Open)
+        {
+            dataVelo.SendMessage(Encoding.ASCII.GetBytes("" + cam.GetComponent<GazeProvider>().HeadVelocity));
+        }
+
+        if (setBounds)
         {
             standartScale = new Vector3(bounds.x, bounds.z, bounds.y);
             representationObject.transform.GetChild(0).transform.localScale = standartScale;
