@@ -25,6 +25,15 @@ public class PCReceiver : MonoBehaviour
     private Vector3 bounds;
     private Vector3 standartScale;
 
+    private Vector3 camLastPos;
+    private Quaternion camLastRot;
+
+    private void Start()
+    {
+        camLastPos = cam.transform.position;
+        camLastRot = cam.transform.rotation;
+    }
+
     public void CreateChannels()
     {
         //Debug.Log("Eyes: " + cam.stereoSeparation);
@@ -145,14 +154,15 @@ public class PCReceiver : MonoBehaviour
 
         if (dataVelo != null && dataVelo.State == DataChannel.ChannelState.Open)
         {
-            dataVelo.SendMessage(Encoding.ASCII.GetBytes("" + cam.GetComponent<GazeProvider>().HeadVelocity));
+            dataVelo.SendMessage(Encoding.ASCII.GetBytes(((cam.transform.position - camLastPos)*Time.deltaTime).ToString("F5") + "|" + ((cam.transform.rotation.eulerAngles - camLastRot.eulerAngles) * Time.deltaTime).ToString("F5")));
         }
+        camLastPos = cam.transform.position;
+        camLastRot = cam.transform.rotation;
 
         if (setBounds)
         {
             standartScale = new Vector3(bounds.x, bounds.z, bounds.y);
             representationObject.transform.GetChild(0).transform.localScale = standartScale;
-            representationObject.transform.GetChild(0).transform.localPosition = new Vector3(0, standartScale.y / 2, 0);
             setBounds = false;
         }
     }
