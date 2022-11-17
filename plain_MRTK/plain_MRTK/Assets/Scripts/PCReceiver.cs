@@ -15,6 +15,8 @@ public class PCReceiver : MonoBehaviour
     public Camera cam;
     public GameObject representationObject;
 
+    public Material HoverMaterial;
+
     private DataChannel dataDummy;
     private DataChannel dataObj;
     private DataChannel dataEye;
@@ -23,6 +25,7 @@ public class PCReceiver : MonoBehaviour
 
     private bool setBounds;
     private Vector3 bounds;
+    private bool isScaleSet = false;
     private Vector3 standartScale;
 
     private Vector3 camLastPos;
@@ -133,6 +136,17 @@ public class PCReceiver : MonoBehaviour
         }
     }
 
+    public void OnHoverShower()
+    {
+        representationObject.GetComponent<MeshRenderer>().material = HoverMaterial;
+    }
+
+    public void OnExitHoverShower()
+    {
+        Material[] emptyArray = new Material[0];
+        representationObject.GetComponent<MeshRenderer>().materials = emptyArray;
+    }
+    
     // Update is called once per frame
     void Update()
     {
@@ -142,9 +156,10 @@ public class PCReceiver : MonoBehaviour
             dataDummy.SendMessage(Encoding.ASCII.GetBytes(cam.transform.rotation.ToString("F3") + "|" + cam.transform.position.ToString("F3")));
         }
 
-        if (dataObj != null && dataObj.State == DataChannel.ChannelState.Open)
+        if (dataObj != null && dataObj.State == DataChannel.ChannelState.Open && isScaleSet)
         {
-            dataObj.SendMessage(Encoding.ASCII.GetBytes(representationObject.transform.position.ToString("F3") + "|" + representationObject.transform.rotation.ToString("F3") + "|" + representationObject.transform.localScale.ToString("F3")));
+            Vector3 normalizedScale = new Vector3(representationObject.transform.localScale.x / standartScale.x, representationObject.transform.localScale.y / standartScale.y, representationObject.transform.localScale.z / standartScale.z);
+            dataObj.SendMessage(Encoding.ASCII.GetBytes(representationObject.transform.position.ToString("F3") + "|" + representationObject.transform.rotation.ToString("F3") + "|" + normalizedScale.ToString("F3")));
         }
 
         if (dataEye != null && dataEye.State == DataChannel.ChannelState.Open)
@@ -162,7 +177,8 @@ public class PCReceiver : MonoBehaviour
         if (setBounds)
         {
             standartScale = new Vector3(bounds.x, bounds.z, bounds.y);
-            representationObject.transform.GetChild(0).transform.localScale = standartScale;
+            representationObject.transform.localScale = standartScale;
+            isScaleSet = true;
             setBounds = false;
         }
     }
