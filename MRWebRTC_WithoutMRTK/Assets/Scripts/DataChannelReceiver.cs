@@ -28,6 +28,8 @@ public class DataChannelReceiver : MonoBehaviour
     public bool eyesAreSet = false;
     public bool setEyes = false;
 
+    private bool showStats = false;
+
     public bool sendBounds = false;
 
     public Vector3 modelPos;
@@ -38,7 +40,12 @@ public class DataChannelReceiver : MonoBehaviour
     Quaternion camRotQuad;
     Vector3 camPosVec;
 
-    Vector3 modelVelocity;
+    Vector3 camPosVelo = new Vector3(0,0,0);
+    Vector3 lastCamposVelo;
+    Vector3 camRotVelo = new Vector3(0,0,0);
+    Vector3 lastCamRotVelo;
+    public float veloFaktor = 10000;
+    public float addedFactor;
 
 
     private void initPeer()
@@ -190,10 +197,16 @@ public class DataChannelReceiver : MonoBehaviour
 
     private void OnMessageReceivedVelo(byte[] message)
     {
+        string[] camTransVeloString = Encoding.UTF8.GetString(message).Split("|");
+        lastCamRotVelo = camRotVelo;
+        lastCamposVelo = camPosVelo;
         try
         {
-            Debug.Log("HeadVelo: " + Encoding.UTF8.GetString(message));
-            modelVelocity = StringToVector3(Encoding.UTF8.GetString(message));
+            string camPosVeloS = camTransVeloString[0];
+            string camRotVeloS = camTransVeloString[1];
+
+            camPosVelo = StringToVector3_2(camPosVeloS);
+            camRotVelo = StringToVector3_2(camRotVeloS);
         }
         catch (Exception e)
         {
@@ -218,33 +231,45 @@ public class DataChannelReceiver : MonoBehaviour
             Vector3 leftEye = new Vector3(0, 0, 0);
             
             Vector3 rightEye = new Vector3(calcSep, 0, 0);
-            Debug.Log(rightEye);
             head.transform.GetChild(0).transform.localPosition = leftEye;
             head.transform.GetChild(1).transform.localPosition = rightEye;
             setEyes = false;
             eyesAreSet = true;
+            showStats = true;
         }
 
         if(camRemoting)
         {
             head.transform.rotation = camRotQuad;
+            head.transform.Rotate(camRotVelo * (((camRotVelo.magnitude - lastCamRotVelo.magnitude)/Time.deltaTime) * veloFaktor));
+
+            addedFactor = ((camPosVelo.magnitude - lastCamposVelo.magnitude)/Time.deltaTime) * veloFaktor;
             head.transform.position = camPosVec;
-            //head.transform.Translate(new Vector3(0, 0, -0.15f));
+            head.transform.Translate(camPosVelo * addedFactor);
+            //head.transform.position = camPosVec;
+            
 
             model.transform.position = modelPos;
             model.transform.rotation = modelRot;
             model.transform.localScale = modelScale;
         }
-        
-
 
         if(sendBounds)
         {
-            Debug.Log("Bounds: " + (Matrix4x4.Scale(model.transform.GetChild(0).transform.localScale) * (model.transform.GetChild(0).transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.bounds.extents * 2)).ToString("F3"));
-            dataBounds.SendMessage(Encoding.UTF8.GetBytes((Matrix4x4.Scale(model.transform.GetChild(0).transform.localScale) * (model.transform.GetChild(0).transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.bounds.extents * 2)).ToString("F3")));
+            dataBounds.SendMessage(Encoding.UTF8.GetBytes((Matrix4x4.Scale(model.transform.GetChild(0).transform.localScale) * (model.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.bounds.extents * 2)).ToString("F3")));
             sendBounds = false;
         }
-        
+
+        if(showStats)
+        {
+            SetEyeSeparationStats(Vector3.Distance(model.transform.position, head.transform.position) + "", calcSep + "");
+        }
+    }
+
+    private void SetEyeSeparationStats(string distance, string seperation)
+    {
+        model.transform.GetChild(0).GetChild(0).GetComponent<TextMesh>().text = distance;
+        model.transform.GetChild(0).GetChild(1).GetComponent<TextMesh>().text = seperation;
     }
 
     public static Vector3 StringToVector3(string sVector)
@@ -264,6 +289,27 @@ public class DataChannelReceiver : MonoBehaviour
             float.Parse(sArray[0])/1000,
             float.Parse(sArray[1])/1000,
             float.Parse(sArray[2])/1000);
+
+        return result;
+    }
+
+    public static Vector3 StringToVector3_2(string sVector)
+    {
+        // Remove the parentheses
+        if (sVector.StartsWith("(") && sVector.EndsWith(")"))
+        {
+            sVector = sVector.Substring(1, sVector.Length - 2);
+            //Debug.Log("sVector: " + sVector);
+        }
+
+        // split the items
+        string[] sArray = sVector.Split(',');
+
+        // store as a Vector3
+        Vector3 result = new Vector3(
+            float.Parse(sArray[0]) / 100000,
+            float.Parse(sArray[1]) / 100000,
+            float.Parse(sArray[2]) / 100000);
 
         return result;
     }

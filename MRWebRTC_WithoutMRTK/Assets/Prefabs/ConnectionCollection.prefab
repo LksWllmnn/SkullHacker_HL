@@ -85,6 +85,7 @@ MonoBehaviour:
   pc: {fileID: 4504632618331161087}
   head: {fileID: 4545599445755601019}
   stereoSeperation: 0.022
+  calcSep: 0
   eyesAreSet: 0
   setEyes: 0
   sendBounds: 0
@@ -92,6 +93,8 @@ MonoBehaviour:
   modelRot: {x: 0, y: 0, z: 0, w: 0}
   modelScale: {x: 0, y: 0, z: 0}
   model: {fileID: 0}
+  veloFaktor: 5
+  addedFactor: 0
 --- !u!1 &4545599444715521686
 GameObject:
   m_ObjectHideFlags: 0
@@ -216,7 +219,7 @@ MonoBehaviour:
   AutoLogErrors: 1
   LocalPeerId: sender
   RemotePeerId: receiver
-  HttpServerAddress: http://127.0.0.1:3000/
+  HttpServerAddress: http://192.168.178.21:3000/
   PollTimeMs: 500
 --- !u!1 &4545599445514953641
 GameObject:
