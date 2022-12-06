@@ -22,6 +22,8 @@ public class PCReceiver : MonoBehaviour
     private DataChannel dataEye;
     private DataChannel dataBounds;
     private DataChannel dataVelo;
+    private DataChannel dataDepth;
+    private DataChannel dataDepthRight;
 
     private bool setBounds;
     private Vector3 bounds;
@@ -31,10 +33,43 @@ public class PCReceiver : MonoBehaviour
     private Vector3 camLastPos;
     private Quaternion camLastRot;
 
+    public bool shouldAddDepth;
+    private byte[] depthMessage;
+    private Texture2D depthTex;
+    public GameObject planeLeft;
+    private byte[] depthMessageRight;
+    private Texture2D depthTexRight;
+    public GameObject planeRight;
+
+    private bool shouldRenderDepth;
+    /*public Material depthMatLeft;
+    public Material depthMatRight;*/
+    public Material matLeft;
+    public Material matRight;
+
+    public Shader depthLeft;
+    public Shader depthRight;
+    public Shader normLeft;
+    public Shader normRight;
+
     private void Start()
     {
         camLastPos = cam.transform.position;
         camLastRot = cam.transform.rotation;
+
+        depthTex = new Texture2D(2, 2);
+        depthTexRight = new Texture2D(2, 2);
+
+        shouldRenderDepth = shouldAddDepth;
+        /*if(shouldRenderDepth)
+        {
+            planeLeft.GetComponent<Renderer>().material = depthMatLeft;
+            planeRight.GetComponent<Renderer>().material = depthMatRight;
+        } else
+        {
+            planeLeft.GetComponent<Renderer>().material = matLeft;
+            planeRight.GetComponent<Renderer>().material = matRight;
+        }*/
     }
 
     public void CreateChannels()
@@ -56,6 +91,16 @@ public class PCReceiver : MonoBehaviour
 
         Task<DataChannel> veloChannel = pC.Peer.AddDataChannelAsync(44, "veloChannel", false, false);
         veloChannel.Wait();
+
+        if(shouldAddDepth)
+        {
+            Task<DataChannel> depthChannel = pC.Peer.AddDataChannelAsync(45, "depthChannel", false, false);
+            depthChannel.Wait();
+
+            Task<DataChannel> depthRightChannel = pC.Peer.AddDataChannelAsync(46, "depthRightChannel", false, false);
+            depthRightChannel.Wait();
+        }
+        
     }
 
     private void OnDataChannelAdded(DataChannel channel)
@@ -84,6 +129,16 @@ public class PCReceiver : MonoBehaviour
             case "veloChannel":
                 dataVelo = channel;
                 dataVelo.StateChanged += this.OnStateChangedVelo;
+                break;
+            case "depthChannel":
+                dataDepth = channel;
+                dataDepth.StateChanged += this.OnStateChangedDepth;
+                dataDepth.MessageReceived += this.MessageReceivedDepth;
+                break;
+            case "depthRightChannel":
+                dataDepthRight = channel;
+                dataDepthRight.StateChanged += this.OnStateChangedDepthRight;
+                dataDepthRight.MessageReceived += this.MessageReceivedDepthRight;
                 break;
         }
     }
@@ -123,6 +178,16 @@ public class PCReceiver : MonoBehaviour
         Debug.Log("DataVelo: " + dataVelo.State);
     }
 
+    private void OnStateChangedDepth()
+    {
+        Debug.Log("DataDepth: " + dataDepth.State);
+    }
+
+    private void OnStateChangedDepthRight()
+    {
+        Debug.Log("DataDepthRight: " + dataDepthRight.State);
+    }
+
     private void MessageReceivedBounds(byte[] message)
     {
         string m = Encoding.UTF8.GetString(message); 
@@ -131,6 +196,32 @@ public class PCReceiver : MonoBehaviour
             bounds = StringToVector3(m);
             setBounds = true;
         }catch (Exception e)
+        {
+            Debug.Log(e);
+        }
+    }
+
+    private void MessageReceivedDepth(byte[] message)
+    {
+        try
+        {
+            
+            depthMessage = message;
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+        }
+    }
+
+    private void MessageReceivedDepthRight(byte[] message)
+    {
+        try
+        {
+
+            depthMessageRight = message;
+        }
+        catch (Exception e)
         {
             Debug.Log(e);
         }
@@ -145,6 +236,21 @@ public class PCReceiver : MonoBehaviour
     {
         Material[] emptyArray = new Material[0];
         representationObject.GetComponent<MeshRenderer>().materials = emptyArray;
+    }
+
+    public void SwitchMat()
+    {
+        if(shouldRenderDepth)
+        {
+            planeLeft.GetComponent<Renderer>().material.shader = depthLeft;
+            planeRight.GetComponent<Renderer>().material.shader = depthRight;
+            shouldRenderDepth = false;
+        } else
+        {
+            planeLeft.GetComponent<Renderer>().material.shader = normLeft;
+            planeRight.GetComponent<Renderer>().material.shader = normRight;
+            shouldRenderDepth = true;
+        }
     }
     
     // Update is called once per frame
@@ -181,6 +287,16 @@ public class PCReceiver : MonoBehaviour
             isScaleSet = true;
             setBounds = false;
         }
+
+        if(shouldRenderDepth)
+        {
+            depthTex.LoadImage(depthMessage);
+            planeLeft.GetComponent<Renderer>().material.SetTexture("_DepthPlane", depthTex);
+
+            depthTexRight.LoadImage(depthMessageRight);
+            planeRight.GetComponent<Renderer>().material.SetTexture("_DepthPlane", depthTexRight);
+        }
+        
     }
 
     public static Vector3 StringToVector3(string sVector)
