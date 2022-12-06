@@ -11,93 +11,94 @@ using Microsoft.MixedReality.Toolkit.Input;
 
 public class PCReceiver : MonoBehaviour
 {
-    public Microsoft.MixedReality.WebRTC.Unity.PeerConnection pC;
-    public Camera cam;
-    public GameObject representationObject;
-
+    [Header("General Connection")]
+    [Tooltip("PeerConnections which builds Connection with NodeDSS")]
+    public Microsoft.MixedReality.WebRTC.Unity.PeerConnection PC;
+    [Tooltip("Mixed Reality Cam of the Scene")]
+    public Camera Cam;
+    [Tooltip("Object in which the streamed object is placed and with which you can manipulate it.")]
+    public GameObject RepresentationObject;
+    [Tooltip("Material that the manipulation object assumes when hovering over it.")]
     public Material HoverMaterial;
 
-    private DataChannel dataDummy;
-    private DataChannel dataObj;
-    private DataChannel dataEye;
-    private DataChannel dataBounds;
-    private DataChannel dataVelo;
-    private DataChannel dataDepth;
-    private DataChannel dataDepthRight;
+    private DataChannel _dataDummy;
+    private DataChannel _dataObj;
+    private DataChannel _dataEye;
+    private DataChannel _dataBounds;
+    private DataChannel _dataVelo;
+    private DataChannel _dataDepth;
+    private DataChannel _dataDepthRight;
 
-    private bool setBounds;
-    private Vector3 bounds;
-    private bool isScaleSet = false;
-    private Vector3 standartScale;
+    private bool _setBounds;
+    private Vector3 _bounds;
+    private bool _isScaleSet = false;
+    private Vector3 _standartScale;
 
-    private Vector3 camLastPos;
-    private Quaternion camLastRot;
+    private Vector3 _camLastPos;
+    private Quaternion _camLastRot;
 
-    public bool shouldAddDepth;
-    private byte[] depthMessage;
-    private Texture2D depthTex;
-    public GameObject planeLeft;
-    private byte[] depthMessageRight;
-    private Texture2D depthTexRight;
-    public GameObject planeRight;
+    [Header("Depth Settings")]
+    [Tooltip("Decides whether the data channels responsible for sending the depth information should be created in the receiver.")]
+    public bool ShouldAddDepth;
+    private byte[] _depthMessage;
+    private Texture2D _depthTex;
+    [Tooltip("Plane on which the information for the left eye is displayed.")]
+    public GameObject PlaneLeft;
+    private byte[] _depthMessageRight;
+    private Texture2D _depthTexRight;
+    [Tooltip("Plane on which the information for the right eye is displayed.")]
+    public GameObject PlaneRight;
 
-    private bool shouldRenderDepth;
-    /*public Material depthMatLeft;
-    public Material depthMatRight;*/
-    public Material matLeft;
-    public Material matRight;
+    private bool _shouldRenderDepth;
+    [Tooltip("Material from the left side Plane.")]
+    public Material MatLeft;
+    [Tooltip("Material from the right side Plane.")]
+    public Material MatRight;
 
-    public Shader depthLeft;
-    public Shader depthRight;
-    public Shader normLeft;
-    public Shader normRight;
+    [Tooltip("Shader which calculates Depth into the local Scene from the remote Object for the left eye.")]
+    public Shader DepthLeft;
+    [Tooltip("Shader which calculates Depth into the local Scene from the remote Object for the right eye.")]
+    public Shader DepthRight;
+    [Tooltip("Shader which doesn't calculates Depth into the local Scene from the remote Object for the right eye.")]
+    public Shader NormLeft;
+    [Tooltip("Shader which doesn't calculates Depth into the local Scene from the remote Object for the right eye.")]
+    public Shader NormRight;
 
     private void Start()
     {
-        camLastPos = cam.transform.position;
-        camLastRot = cam.transform.rotation;
+        _camLastPos = Cam.transform.position;
+        _camLastRot = Cam.transform.rotation;
 
-        depthTex = new Texture2D(2, 2);
-        depthTexRight = new Texture2D(2, 2);
+        _depthTex = new Texture2D(2, 2);
+        _depthTexRight = new Texture2D(2, 2);
 
-        shouldRenderDepth = shouldAddDepth;
-        /*if(shouldRenderDepth)
-        {
-            planeLeft.GetComponent<Renderer>().material = depthMatLeft;
-            planeRight.GetComponent<Renderer>().material = depthMatRight;
-        } else
-        {
-            planeLeft.GetComponent<Renderer>().material = matLeft;
-            planeRight.GetComponent<Renderer>().material = matRight;
-        }*/
+        _shouldRenderDepth = ShouldAddDepth;
     }
 
     public void CreateChannels()
     {
-        //Debug.Log("Eyes: " + cam.stereoSeparation);
-        
-        pC.Peer.DataChannelAdded += this.OnDataChannelAdded;
-        Task<DataChannel> dummy = pC.Peer.AddDataChannelAsync(40, "dummy", false, false);
+        PC.Peer.DataChannelAdded += this.OnDataChannelAdded;
+        Task<DataChannel> dummy = PC.Peer.AddDataChannelAsync(40, "dummy", false, false);
         dummy.Wait();
 
-        Task<DataChannel> objChannel = pC.Peer.AddDataChannelAsync(41, "objChannel", false, false);
+        Task<DataChannel> objChannel = PC.Peer.AddDataChannelAsync(41, "objChannel", false, false);
         objChannel.Wait();
 
-        Task<DataChannel> eyeChannel = pC.Peer.AddDataChannelAsync(42, "eyeChannel", false, false);
+        Task<DataChannel> eyeChannel = PC.Peer.AddDataChannelAsync(42, "eyeChannel", false, false);
         eyeChannel.Wait();
 
-        Task<DataChannel> boundsChannel = pC.Peer.AddDataChannelAsync(43, "boundsChannel", false, false);
+        Task<DataChannel> boundsChannel = PC.Peer.AddDataChannelAsync(43, "boundsChannel", false, false);
         boundsChannel.Wait();
 
-        Task<DataChannel> veloChannel = pC.Peer.AddDataChannelAsync(44, "veloChannel", false, false);
+        Task<DataChannel> veloChannel = PC.Peer.AddDataChannelAsync(44, "veloChannel", false, false);
         veloChannel.Wait();
 
-        if(shouldAddDepth)
+        if(ShouldAddDepth)
         {
-            Task<DataChannel> depthChannel = pC.Peer.AddDataChannelAsync(45, "depthChannel", false, false);
+            Task<DataChannel> depthChannel = PC.Peer.AddDataChannelAsync(45, "depthChannel", false, false);
             depthChannel.Wait();
 
-            Task<DataChannel> depthRightChannel = pC.Peer.AddDataChannelAsync(46, "depthRightChannel", false, false);
+            Task<DataChannel> depthRightChannel = PC.Peer.AddDataChannelAsync(46, "depthRightChannel", false, false);
             depthRightChannel.Wait();
         }
         
@@ -105,87 +106,74 @@ public class PCReceiver : MonoBehaviour
 
     private void OnDataChannelAdded(DataChannel channel)
     {
-        Debug.Log("Hello " + channel.Label);
         switch (channel.Label)
         {
             case "dummy":
-                dataDummy = channel;
-                dataDummy.StateChanged += this.OnStateChangedDummy;
+                _dataDummy = channel;
+                _dataDummy.StateChanged += this.OnStateChangedDummy;
                 break;
 
             case "objChannel":
-                dataObj = channel;
-                dataObj.StateChanged += this.OnStateChangedObj;
+                _dataObj = channel;
+                _dataObj.StateChanged += this.OnStateChangedObj;
                 break;
             case "eyeChannel":
-                dataEye = channel;
-                dataEye.StateChanged += this.OnStateChangedEye;
+                _dataEye = channel;
+                _dataEye.StateChanged += this.OnStateChangedEye;
                 break;
             case "boundsChannel":
-                dataBounds = channel;
-                dataBounds.StateChanged += this.OnStateChangedBounds;
-                dataBounds.MessageReceived += this.MessageReceivedBounds;
+                _dataBounds = channel;
+                _dataBounds.StateChanged += this.OnStateChangedBounds;
+                _dataBounds.MessageReceived += this.MessageReceivedBounds;
                 break;
             case "veloChannel":
-                dataVelo = channel;
-                dataVelo.StateChanged += this.OnStateChangedVelo;
+                _dataVelo = channel;
+                _dataVelo.StateChanged += this.OnStateChangedVelo;
                 break;
             case "depthChannel":
-                dataDepth = channel;
-                dataDepth.StateChanged += this.OnStateChangedDepth;
-                dataDepth.MessageReceived += this.MessageReceivedDepth;
+                _dataDepth = channel;
+                _dataDepth.StateChanged += this.OnStateChangedDepth;
+                _dataDepth.MessageReceived += this.MessageReceivedDepth;
                 break;
             case "depthRightChannel":
-                dataDepthRight = channel;
-                dataDepthRight.StateChanged += this.OnStateChangedDepthRight;
-                dataDepthRight.MessageReceived += this.MessageReceivedDepthRight;
+                _dataDepthRight = channel;
+                _dataDepthRight.StateChanged += this.OnStateChangedDepthRight;
+                _dataDepthRight.MessageReceived += this.MessageReceivedDepthRight;
                 break;
         }
     }
     private void OnStateChangedDummy()
     {
-        Debug.Log("DataDummy: " + dataDummy.State);
-
-        if (dataDummy.State == DataChannel.ChannelState.Open)
-        {
-            dataDummy.SendMessage(Encoding.ASCII.GetBytes("Hello over there... from Dummy"));
-            Debug.Log("Message sended... from Dummy");
-        }
+        Debug.Log("DataDummy: " + _dataDummy.State);
     }
 
     private void OnStateChangedObj()
     {
-        Debug.Log("DataObj: " + dataObj.State);
-
-        if (dataObj.State == DataChannel.ChannelState.Open)
-        {
-            dataObj.SendMessage(Encoding.ASCII.GetBytes("Hello over there"));
-            Debug.Log("Message sended... from Obj");
-        }
+        Debug.Log("DataObj: " + _dataObj.State);
     }
 
     private void OnStateChangedEye()
     {
-        Debug.Log("DataEye: " + dataEye.State);
+        Debug.Log("DataEye: " + _dataEye.State);
     }
     private void OnStateChangedBounds()
     {
-        Debug.Log("DataBounds: " + dataBounds.State);
+        Debug.Log("DataBounds: " + _dataBounds.State);
     }
 
     private void OnStateChangedVelo()
     {
-        Debug.Log("DataVelo: " + dataVelo.State);
+        Debug.Log("DataVelo: " + _dataVelo.State);
     }
 
     private void OnStateChangedDepth()
     {
-        Debug.Log("DataDepth: " + dataDepth.State);
+        Debug.Log("DataDepth: " + _dataDepth.State);
     }
 
     private void OnStateChangedDepthRight()
     {
-        Debug.Log("DataDepthRight: " + dataDepthRight.State);
+        Debug.Log("DataDepthRight: " + _dataDepthRight.State);
     }
 
     private void MessageReceivedBounds(byte[] message)
@@ -193,8 +181,8 @@ public class PCReceiver : MonoBehaviour
         string m = Encoding.UTF8.GetString(message); 
         try
         {
-            bounds = StringToVector3(m);
-            setBounds = true;
+            _bounds = StringToVector3(m);
+            _setBounds = true;
         }catch (Exception e)
         {
             Debug.Log(e);
@@ -205,8 +193,7 @@ public class PCReceiver : MonoBehaviour
     {
         try
         {
-            
-            depthMessage = message;
+            _depthMessage = message;
         }
         catch (Exception e)
         {
@@ -218,8 +205,7 @@ public class PCReceiver : MonoBehaviour
     {
         try
         {
-
-            depthMessageRight = message;
+            _depthMessageRight = message;
         }
         catch (Exception e)
         {
@@ -229,72 +215,71 @@ public class PCReceiver : MonoBehaviour
 
     public void OnHoverShower()
     {
-        representationObject.GetComponent<MeshRenderer>().material = HoverMaterial;
+        RepresentationObject.GetComponent<MeshRenderer>().material = HoverMaterial;
     }
 
     public void OnExitHoverShower()
     {
         Material[] emptyArray = new Material[0];
-        representationObject.GetComponent<MeshRenderer>().materials = emptyArray;
+        RepresentationObject.GetComponent<MeshRenderer>().materials = emptyArray;
     }
 
     public void SwitchMat()
     {
-        if(shouldRenderDepth)
+        if(_shouldRenderDepth)
         {
-            planeLeft.GetComponent<Renderer>().material.shader = depthLeft;
-            planeRight.GetComponent<Renderer>().material.shader = depthRight;
-            shouldRenderDepth = false;
+            PlaneLeft.GetComponent<Renderer>().material.shader = DepthLeft;
+            PlaneRight.GetComponent<Renderer>().material.shader = DepthRight;
+            _shouldRenderDepth = false;
         } else
         {
-            planeLeft.GetComponent<Renderer>().material.shader = normLeft;
-            planeRight.GetComponent<Renderer>().material.shader = normRight;
-            shouldRenderDepth = true;
+            PlaneLeft.GetComponent<Renderer>().material.shader = NormLeft;
+            PlaneRight.GetComponent<Renderer>().material.shader = NormRight;
+            _shouldRenderDepth = true;
         }
     }
     
-    // Update is called once per frame
     void Update()
     {
         
-        if (dataDummy != null && dataDummy.State == DataChannel.ChannelState.Open)
+        if (_dataDummy != null && _dataDummy.State == DataChannel.ChannelState.Open)
         {
-            dataDummy.SendMessage(Encoding.ASCII.GetBytes(cam.transform.rotation.ToString("F3") + "|" + cam.transform.position.ToString("F3")));
+            _dataDummy.SendMessage(Encoding.ASCII.GetBytes(Cam.transform.rotation.ToString("F3") + "|" + Cam.transform.position.ToString("F3")));
         }
 
-        if (dataObj != null && dataObj.State == DataChannel.ChannelState.Open && isScaleSet)
+        if (_dataObj != null && _dataObj.State == DataChannel.ChannelState.Open && _isScaleSet)
         {
-            Vector3 normalizedScale = new Vector3(representationObject.transform.localScale.x / standartScale.x, representationObject.transform.localScale.y / standartScale.y, representationObject.transform.localScale.z / standartScale.z);
-            dataObj.SendMessage(Encoding.ASCII.GetBytes(representationObject.transform.position.ToString("F3") + "|" + representationObject.transform.rotation.ToString("F3") + "|" + normalizedScale.ToString("F3")));
+            Vector3 normalizedScale = new Vector3(RepresentationObject.transform.localScale.x / _standartScale.x, RepresentationObject.transform.localScale.y / _standartScale.y, RepresentationObject.transform.localScale.z / _standartScale.z);
+            _dataObj.SendMessage(Encoding.ASCII.GetBytes(RepresentationObject.transform.position.ToString("F3") + "|" + RepresentationObject.transform.rotation.ToString("F3") + "|" + normalizedScale.ToString("F3")));
         }
 
-        if (dataEye != null && dataEye.State == DataChannel.ChannelState.Open)
+        if (_dataEye != null && _dataEye.State == DataChannel.ChannelState.Open)
         {
-            dataEye.SendMessage(Encoding.ASCII.GetBytes("" + cam.stereoSeparation));
+            _dataEye.SendMessage(Encoding.ASCII.GetBytes("" + Cam.stereoSeparation));
         }
 
-        if (dataVelo != null && dataVelo.State == DataChannel.ChannelState.Open)
+        if (_dataVelo != null && _dataVelo.State == DataChannel.ChannelState.Open)
         {
-            dataVelo.SendMessage(Encoding.ASCII.GetBytes(((cam.transform.position - camLastPos)*Time.deltaTime).ToString("F5") + "|" + ((cam.transform.rotation.eulerAngles - camLastRot.eulerAngles) * Time.deltaTime).ToString("F5")));
+            _dataVelo.SendMessage(Encoding.ASCII.GetBytes(((Cam.transform.position - _camLastPos)*Time.deltaTime).ToString("F5") + "|" + ((Cam.transform.rotation.eulerAngles - _camLastRot.eulerAngles) * Time.deltaTime).ToString("F5")));
         }
-        camLastPos = cam.transform.position;
-        camLastRot = cam.transform.rotation;
+        _camLastPos = Cam.transform.position;
+        _camLastRot = Cam.transform.rotation;
 
-        if (setBounds)
+        if (_setBounds)
         {
-            standartScale = new Vector3(bounds.x, bounds.z, bounds.y);
-            representationObject.transform.localScale = standartScale;
-            isScaleSet = true;
-            setBounds = false;
+            _standartScale = new Vector3(_bounds.x, _bounds.z, _bounds.y);
+            RepresentationObject.transform.localScale = _standartScale;
+            _isScaleSet = true;
+            _setBounds = false;
         }
 
-        if(shouldRenderDepth)
+        if(_shouldRenderDepth)
         {
-            depthTex.LoadImage(depthMessage);
-            planeLeft.GetComponent<Renderer>().material.SetTexture("_DepthPlane", depthTex);
+            _depthTex.LoadImage(_depthMessage);
+            PlaneLeft.GetComponent<Renderer>().material.SetTexture("_DepthPlane", _depthTex);
 
-            depthTexRight.LoadImage(depthMessageRight);
-            planeRight.GetComponent<Renderer>().material.SetTexture("_DepthPlane", depthTexRight);
+            _depthTexRight.LoadImage(_depthMessageRight);
+            PlaneRight.GetComponent<Renderer>().material.SetTexture("_DepthPlane", _depthTexRight);
         }
         
     }

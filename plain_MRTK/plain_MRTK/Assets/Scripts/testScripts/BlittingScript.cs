@@ -5,46 +5,39 @@ using UnityEngine.Rendering;
 
 public class BlittingScript : MonoBehaviour
 {
-    public Renderer vidRend_Left;
-    public Renderer vidRend_Right;
+    public Renderer VidRendLeft;
+    public Renderer VidRendRight;
 
-    private Material vidMatLeft;
-    private Material vidMatRight;
+    private Material _vidMatLeft;
+    private Material _vidMatRight;
 
-    private bool activateBlit = false;
-    private RenderTexture stationLeft;
+    private bool _activateBlit = false;
+    private RenderTexture _stationLeft;
 
     [ExecuteInEditMode]
 
     private void Start()
     {
-        vidMatLeft = vidRend_Left.material;
-        vidMatRight = vidRend_Right.material;
+        _vidMatLeft = VidRendLeft.material;
+        _vidMatRight = VidRendRight.material;
     }
 
-    public void activateBlitting()
+    public void ActivateBlitting()
     {
-        activateBlit = true;
-        Debug.Log("start blitting");
+        _activateBlit = true;
     }
-    
 
     // Update is called once per frame
     void OnRenderImage(RenderTexture src, RenderTexture dest)
     {
-        
-        if(activateBlit)
+        if(_activateBlit)
         {
-            stationLeft = new RenderTexture(src.width, src.height, 0);
-            Graphics.Blit(src, stationLeft, vidMatLeft);
-            Graphics.Blit(stationLeft, dest, vidMatRight);
-
-            
+            _stationLeft = new RenderTexture(src.width, src.height, 0);
+            Graphics.Blit(src, _stationLeft, _vidMatLeft);
+            Graphics.Blit(_stationLeft, dest, _vidMatRight);
         } else
         {
             Graphics.Blit(src, dest);
         }
-        
-
     }
 }

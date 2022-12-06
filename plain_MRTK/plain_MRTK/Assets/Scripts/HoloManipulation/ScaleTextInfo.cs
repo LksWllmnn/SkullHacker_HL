@@ -6,7 +6,6 @@ public class ScaleTextInfo : MonoBehaviour
 {
     public GameObject Manipulator;
 
-
     // Update is called once per frame
     void Update()
     {

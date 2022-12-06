@@ -14,36 +14,36 @@ public class ConInfos : MonoBehaviour
     public GameObject RemoteID;
     public GameObject IPID;
 
-    public TouchScreenKeyboard keyboard;
+    public TouchScreenKeyboard Keyboard;
 
-    private bool IsLocalIDWriting = false;
-    private bool IsRemoteIDWriting = false;
-    private bool IsIPIDWriting = false;
+    private bool _isLocalIDWriting = false;
+    private bool _isRemoteIDWriting = false;
+    private bool _isIPIDWriting = false;
 
-    MixedRealityKeyboard keyb;
+    MixedRealityKeyboard _keyb;
 
     public void WriteLocalID()
     {
-        IsLocalIDWriting = true;
-        IsRemoteIDWriting = false;
-        IsIPIDWriting = false;
-        keyboard = TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false, false, false, false);
+        _isLocalIDWriting = true;
+        _isRemoteIDWriting = false;
+        _isIPIDWriting = false;
+        Keyboard = TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false, false, false, false);
     }
 
     public void WriteRemoteID()
     {
-        IsLocalIDWriting = false;
-        IsRemoteIDWriting = true;
-        IsIPIDWriting = false;
-        keyboard = TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false, false, false, false);
+        _isLocalIDWriting = false;
+        _isRemoteIDWriting = true;
+        _isIPIDWriting = false;
+        Keyboard = TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false, false, false, false);
     }
 
     public void WriteIPID()
     {
-        IsLocalIDWriting = false;
-        IsRemoteIDWriting = false;
-        IsIPIDWriting = true;
-        keyboard = TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false, false, false, false);
+        _isLocalIDWriting = false;
+        _isRemoteIDWriting = false;
+        _isIPIDWriting = true;
+        Keyboard = TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false, false, false, false);
     }
     
     public void Safe()
@@ -55,21 +55,21 @@ public class ConInfos : MonoBehaviour
 
     private void Update()
     {
-        if (keyboard != null && IsLocalIDWriting)
+        if (Keyboard != null && _isLocalIDWriting)
         {
-            LocalID.GetComponent<TextMesh>().text = keyboard.text;
+            LocalID.GetComponent<TextMesh>().text = Keyboard.text;
             // Do stuff with keyboardText
         }
 
-        if (keyboard != null && IsRemoteIDWriting)
+        if (Keyboard != null && _isRemoteIDWriting)
         {
-            RemoteID.GetComponent<TextMesh>().text = keyboard.text;
+            RemoteID.GetComponent<TextMesh>().text = Keyboard.text;
             // Do stuff with keyboardText
         }
 
-        if (keyboard != null && IsIPIDWriting)
+        if (Keyboard != null && _isIPIDWriting)
         {
-            IPID.GetComponent<TextMesh>().text = keyboard.text;
+            IPID.GetComponent<TextMesh>().text = Keyboard.text;
             // Do stuff with keyboardText
         }
     }

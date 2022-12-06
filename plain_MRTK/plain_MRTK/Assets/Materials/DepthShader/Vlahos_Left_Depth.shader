@@ -124,7 +124,6 @@ Shader "Custom/Vlahos_Left_Depth"
                     //https://smirnov-am.github.io/chromakeying/
                     alpha = 1 - _a1 * (col[1] - _a2 * col[2]);
                     o.color = fixed4(col[0], col[1], col[2], alpha);
-                    //if(alpha>0.1) o.depth = depthBack[0];
                     o.depth = alpha * depthBack[0];
                     return o;
                 }
@@ -133,8 +132,6 @@ Shader "Custom/Vlahos_Left_Depth"
                     o.depth = 0;
                     return o;
                 }
-
-                //o.depth = (log(c * i.position.z + 1) / log(c * far + 1) * i.position.w);
 
                 return o;
             }

@@ -5881,19 +5881,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0fb71e31a742ec4b946b633d2ef8e91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pC: {fileID: 114452440398351871}
-  cam: {fileID: 1221709219}
-  representationObject: {fileID: 1212283810}
+  PC: {fileID: 114452440398351871}
+  Cam: {fileID: 1221709219}
+  RepresentationObject: {fileID: 1212283810}
   HoverMaterial: {fileID: 2100000, guid: f3aaa0b1f6163d644a52d233d841f2b0, type: 2}
-  shouldAddDepth: 1
-  planeLeft: {fileID: 984384809}
-  planeRight: {fileID: 1119887758}
-  matLeft: {fileID: 2100000, guid: 7fe4d24c5ec3bdb42980d362ffadad9a, type: 2}
-  matRight: {fileID: 2100000, guid: d585792f0fd9edf49a5ccaa6141f4cc3, type: 2}
-  depthLeft: {fileID: 4800000, guid: 340868fc148fb11418ad766787042021, type: 3}
-  depthRight: {fileID: 4800000, guid: 6101bcf11a80605469fcbc4b0b85f1cc, type: 3}
-  normLeft: {fileID: 4800000, guid: c42e753a68788f74bb035507205e1a9e, type: 3}
-  normRight: {fileID: 4800000, guid: 0ad55477760021c4d9a73eafbeba03dd, type: 3}
+  ShouldAddDepth: 1
+  PlaneLeft: {fileID: 984384809}
+  PlaneRight: {fileID: 1119887758}
+  MatLeft: {fileID: 2100000, guid: 8497a55f31fa4c34d941be141b13237a, type: 2}
+  MatRight: {fileID: 2100000, guid: 2f9ecbbfc33bfdf40ab2b02b6bb9b56b, type: 2}
+  DepthLeft: {fileID: 4800000, guid: 340868fc148fb11418ad766787042021, type: 3}
+  DepthRight: {fileID: 4800000, guid: 6101bcf11a80605469fcbc4b0b85f1cc, type: 3}
+  NormLeft: {fileID: 4800000, guid: c42e753a68788f74bb035507205e1a9e, type: 3}
+  NormRight: {fileID: 4800000, guid: 0ad55477760021c4d9a73eafbeba03dd, type: 3}
 --- !u!4 &4483042683139361
 Transform:
   m_ObjectHideFlags: 0

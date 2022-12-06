@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class LookAtCam : MonoBehaviour
 {
-    public Camera cam;
-    public Transform parent;
+    public Camera Cam;
+    public Transform Parent;
 
-    private Vector3 originalParentScale;
-    private float largestBounds;
+    private Vector3 _originalParentScale;
+    private float _largestBounds;
 
     private void Start()
     {
-        originalParentScale = parent.localScale; 
+        _originalParentScale = Parent.localScale; 
     }
 
     private float TallestInVector3(Vector3 vec)
@@ -25,12 +25,12 @@ public class LookAtCam : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        this.transform.LookAt(cam.transform);
+        this.transform.LookAt(Cam.transform);
 
-        if(originalParentScale != parent.localScale)
+        if(_originalParentScale != Parent.localScale)
         {
-            largestBounds = TallestInVector3(parent.localScale);
-            this.transform.localScale = originalParentScale*largestBounds;
+            _largestBounds = TallestInVector3(Parent.localScale);
+            this.transform.localScale = _originalParentScale*_largestBounds;
         }
     }
 }
