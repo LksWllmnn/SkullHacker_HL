@@ -17,24 +17,24 @@ public class DataChannelReceiver : MonoBehaviour
     private DataChannel dataDummy;
     private DataChannel dataBounds;
     private DataChannel dataVelo;
+    private DataChannel dataDepth;
+    private DataChannel dataDepthRight;
 
     private bool isPeerInitialized = false;
-
     private bool camRemoting = false;
 
     public GameObject head;
     public float stereoSeperation = 0.022f;
     public float calcSep;
-    public bool eyesAreSet = false;
-    public bool setEyes = false;
+    private bool eyesAreSet = false;
+    private bool setEyes = false;
 
     private bool showStats = false;
+    private bool sendBounds = false;
 
-    public bool sendBounds = false;
-
-    public Vector3 modelPos;
-    public Quaternion modelRot;
-    public Vector3 modelScale;
+    private Vector3 modelPos;
+    private Quaternion modelRot;
+    private Vector3 modelScale;
     public GameObject model;
 
     Quaternion camRotQuad;
@@ -47,6 +47,12 @@ public class DataChannelReceiver : MonoBehaviour
     public float veloFaktor = 10000;
     public float addedFactor;
 
+    public bool rotationIsStatic;
+
+    public bool activateDepthInfo;
+    public dt2 depthTexture;
+    public dt2 depthTextureRight;
+    private bool sendDepth = false;
 
     private void initPeer()
     {
@@ -67,6 +73,18 @@ public class DataChannelReceiver : MonoBehaviour
 
         Task<DataChannel> veloChannel = pc.Peer.AddDataChannelAsync(44, "veloChannel", false, false);
         veloChannel.Wait();
+
+        
+
+        if (activateDepthInfo)
+        {
+            Task<DataChannel> depthChannel = pc.Peer.AddDataChannelAsync(45, "depthChannel", false, false);
+            depthChannel.Wait();
+
+            Task<DataChannel> depthRightChannel = pc.Peer.AddDataChannelAsync(46, "depthRightChannel", false, false);
+            depthRightChannel.Wait();
+        }
+        
     }
 
     private void OnDataChannelAdded(DataChannel channel)
@@ -98,6 +116,14 @@ public class DataChannelReceiver : MonoBehaviour
                 dataVelo.StateChanged += this.OnStateChangedVelo;
                 dataVelo.MessageReceived += OnMessageReceivedVelo;
                 break;
+            case "depthChannel":
+                dataDepth = channel;
+                dataDepth.StateChanged += this.OnStateChangedDepth;
+                break;
+            case "depthRightChannel":
+                dataDepthRight = channel;
+                dataDepthRight.StateChanged += this.OnStateChangedDepthRight;
+                break;
         }
     }
 
@@ -113,17 +139,17 @@ public class DataChannelReceiver : MonoBehaviour
 
     private void OnStateChanged1()
     {
-        Debug.Log("Data1: " + dataObj.State);
+        Debug.Log("DataObj: " + dataObj.State);
     }
 
     private void OnStateChangedEye()
     {
-        Debug.Log("Data1: " + dataEye.State);
+        Debug.Log("DataEyes: " + dataEye.State);
     }
 
     private void OnStateChangedBounds()
     {
-        Debug.Log("Data1: " + dataBounds.State);
+        Debug.Log("DataBounds: " + dataBounds.State);
         if(dataBounds.State  == DataChannel.ChannelState.Open)
         {
             sendBounds = true;
@@ -133,6 +159,21 @@ public class DataChannelReceiver : MonoBehaviour
     private void OnStateChangedVelo()
     {
         Debug.Log("Velo: " + dataVelo.State);
+    }
+
+    private void OnStateChangedDepth()
+    {
+        Debug.Log("Depth: " + dataDepth.State);
+        if(dataDepth.State == DataChannel.ChannelState.Open)
+        {
+            sendDepth = true;
+        }
+    }
+
+    private void OnStateChangedDepthRight()
+    {
+        Debug.Log("DepthRight: " + dataDepthRight.State);
+        
     }
 
     private void PeerIsConnected()
@@ -230,7 +271,7 @@ public class DataChannelReceiver : MonoBehaviour
             calcSep = -0.1f * Vector3.Distance(model.transform.position,head.transform.position) + 0.08f;
             Vector3 leftEye = new Vector3(0, 0, 0);
             
-            Vector3 rightEye = new Vector3(calcSep, 0, 0);
+            Vector3 rightEye = new Vector3(stereoSeperation, 0, 0);
             head.transform.GetChild(0).transform.localPosition = leftEye;
             head.transform.GetChild(1).transform.localPosition = rightEye;
             setEyes = false;
@@ -240,13 +281,19 @@ public class DataChannelReceiver : MonoBehaviour
 
         if(camRemoting)
         {
-            head.transform.rotation = camRotQuad;
-            head.transform.Rotate(camRotVelo * (((camRotVelo.magnitude - lastCamRotVelo.magnitude)/Time.deltaTime) * veloFaktor));
+            if(!rotationIsStatic)
+            {
+                head.transform.rotation = camRotQuad;
+                head.transform.Rotate(camRotVelo * (((camRotVelo.magnitude - lastCamRotVelo.magnitude) / Time.deltaTime) * veloFaktor));
+            } else
+            {
+                head.transform.LookAt(model.transform.GetChild(0).transform.position);
+            }
+            
 
             addedFactor = ((camPosVelo.magnitude - lastCamposVelo.magnitude)/Time.deltaTime) * veloFaktor;
             head.transform.position = camPosVec;
             head.transform.Translate(camPosVelo * addedFactor);
-            //head.transform.position = camPosVec;
             
 
             model.transform.position = modelPos;
@@ -256,20 +303,26 @@ public class DataChannelReceiver : MonoBehaviour
 
         if(sendBounds)
         {
-            dataBounds.SendMessage(Encoding.UTF8.GetBytes((Matrix4x4.Scale(model.transform.GetChild(0).transform.localScale) * (model.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh.bounds.extents * 2)).ToString("F3")));
+            dataBounds.SendMessage(Encoding.UTF8.GetBytes((Matrix4x4.Scale(model.transform.GetChild(0).transform.localScale) * (model.transform.GetChild(0).GetChild(0).GetComponent<MeshFilter>().sharedMesh.bounds.extents * 2)).ToString("F3")));
             sendBounds = false;
         }
 
         if(showStats)
         {
-            SetEyeSeparationStats(Vector3.Distance(model.transform.position, head.transform.position) + "", calcSep + "");
+            //SetEyeSeparationStats(Vector3.Distance(model.transform.position, head.transform.position) + "", calcSep + "");
+        }
+
+        if(sendDepth)
+        {
+            dataDepth.SendMessage(depthTexture.jpgSample);
+            dataDepthRight.SendMessage(depthTextureRight.jpgSample);
         }
     }
 
     private void SetEyeSeparationStats(string distance, string seperation)
     {
-        model.transform.GetChild(0).GetChild(0).GetComponent<TextMesh>().text = distance;
-        model.transform.GetChild(0).GetChild(1).GetComponent<TextMesh>().text = seperation;
+        //model.transform.GetChild(0).GetChild(0).GetComponent<TextMesh>().text = distance;
+        //model.transform.GetChild(0).GetChild(1).GetComponent<TextMesh>().text = seperation;
     }
 
     public static Vector3 StringToVector3(string sVector)
