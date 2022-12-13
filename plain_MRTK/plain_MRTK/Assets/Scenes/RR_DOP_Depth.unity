@@ -2913,6 +2913,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Object: {fileID: 1212283811}
   Parent: {fileID: 1221709220}
+  ScaleFactor: 1
 --- !u!1 &1011459091
 GameObject:
   m_ObjectHideFlags: 0
@@ -3217,6 +3218,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Object: {fileID: 1212283811}
   Parent: {fileID: 1221709220}
+  ScaleFactor: 1
 --- !u!1 &1176701561
 GameObject:
   m_ObjectHideFlags: 0
@@ -6108,9 +6110,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1119887758}
     - target: {fileID: 6929202077657596631, guid: 799f034c3ae91e04d8017f3330b58f19, type: 3}
+      propertyPath: CalcDistLeft
+      value: 
+      objectReference: {fileID: 984384814}
+    - target: {fileID: 6929202077657596631, guid: 799f034c3ae91e04d8017f3330b58f19, type: 3}
       propertyPath: DepthMatLeft
       value: 
       objectReference: {fileID: 2100000, guid: 7fe4d24c5ec3bdb42980d362ffadad9a, type: 2}
+    - target: {fileID: 6929202077657596631, guid: 799f034c3ae91e04d8017f3330b58f19, type: 3}
+      propertyPath: CalcDistRight
+      value: 
+      objectReference: {fileID: 1119887763}
     - target: {fileID: 6929202077657596631, guid: 799f034c3ae91e04d8017f3330b58f19, type: 3}
       propertyPath: DepthMatRight
       value: 

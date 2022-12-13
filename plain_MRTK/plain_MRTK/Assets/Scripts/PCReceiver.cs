@@ -21,6 +21,10 @@ public class PCReceiver : MonoBehaviour
     public GameObject RepresentationObject;
     [Tooltip("Material that the manipulation object assumes when hovering over it.")]
     public Material HoverMaterial;
+    [Tooltip("Plane Comonent which you should put on the plane to controll the lookat Camera function and Scale fitting to the scene")]
+    public CalculateDistance CalcDistLeft;
+    [Tooltip("Plane Comonent which you should put on the plane to controll the lookat Camera function and Scale fitting to the scene")]
+    public CalculateDistance CalcDistRight;
 
     private DataChannel _dataDummy;
     private DataChannel _dataObj;
@@ -29,6 +33,7 @@ public class PCReceiver : MonoBehaviour
     private DataChannel _dataVelo;
     private DataChannel _dataDepth;
     private DataChannel _dataDepthRight;
+    private DataChannel _dataScalePlane;
 
     private bool _setBounds;
     private Vector3 _bounds;
@@ -55,14 +60,6 @@ public class PCReceiver : MonoBehaviour
     public Material MatLeft;
     [Tooltip("Material from the right side Plane.")]
     public Material MatRight;
-    /*[Tooltip("Material from the left side Plane Depth.")]
-    public Material DepthMatLeft;
-    [Tooltip("Material from the right side Plane Depth.")]
-    public Material DepthMatRight;
-
-    public VideoRenderer LeftVidRenderer;
-    public VideoRenderer RightVidRenderer;*/
-
     
     [Tooltip("Shader which calculates Depth into the local Scene from the remote Object for the left eye.")]
     public Shader DepthLeft;
@@ -75,6 +72,9 @@ public class PCReceiver : MonoBehaviour
 
     private int _depthLimiter = 4;
     private int _depthLimiterCounter = 1;
+    private bool _isCheckingDepth = false;
+
+    private float _scalePlaneFactor = 1;
 
     private void Start()
     {
@@ -113,7 +113,10 @@ public class PCReceiver : MonoBehaviour
             Task<DataChannel> depthRightChannel = PC.Peer.AddDataChannelAsync(46, "depthRightChannel", false, false);
             depthRightChannel.Wait();
         }
-        
+
+        Task<DataChannel> scalePlaneChannel = PC.Peer.AddDataChannelAsync(47, "scalePlaneChannel", false, false);
+        scalePlaneChannel.Wait();
+
     }
 
     public void SetMaterial()
@@ -168,6 +171,11 @@ public class PCReceiver : MonoBehaviour
                 _dataDepthRight.StateChanged += this.OnStateChangedDepthRight;
                 _dataDepthRight.MessageReceived += this.MessageReceivedDepthRight;
                 break;
+            case "scalePlaneChannel":
+                _dataScalePlane = channel;
+                _dataScalePlane.StateChanged += this.OnStateChangedScalePlane;
+                _dataScalePlane.MessageReceived += this.MessageReceivedScalePlane;
+                break;
         }
     }
     private void OnStateChangedDummy()
@@ -204,6 +212,10 @@ public class PCReceiver : MonoBehaviour
         Debug.Log("DataDepthRight: " + _dataDepthRight.State);
     }
 
+    private void OnStateChangedScalePlane()
+    {
+        Debug.Log("ScalePlane: " + _dataScalePlane.State);
+    }
     private void MessageReceivedBounds(byte[] message)
     {
         string m = Encoding.UTF8.GetString(message); 
@@ -241,6 +253,19 @@ public class PCReceiver : MonoBehaviour
         }
     }
 
+    private void MessageReceivedScalePlane(byte[] message)
+    {
+        try
+        {
+            string scalePlaneFactor = Encoding.UTF8.GetString(message);
+            _scalePlaneFactor = float.Parse(scalePlaneFactor);
+        }
+        catch (Exception e)
+        {
+            Debug.Log(e);
+        }
+    }
+
     public void OnHoverShower()
     {
         RepresentationObject.GetComponent<MeshRenderer>().material = HoverMaterial;
@@ -263,6 +288,9 @@ public class PCReceiver : MonoBehaviour
         {
             Vector3 normalizedScale = new Vector3(RepresentationObject.transform.localScale.x / _standartScale.x, RepresentationObject.transform.localScale.y / _standartScale.y, RepresentationObject.transform.localScale.z / _standartScale.z);
             _dataObj.SendMessage(Encoding.ASCII.GetBytes(RepresentationObject.transform.position.ToString("F3") + "|" + RepresentationObject.transform.rotation.ToString("F3") + "|" + normalizedScale.ToString("F3")));
+
+            CalcDistLeft.ScaleFactor = _scalePlaneFactor;
+            CalcDistRight.ScaleFactor = _scalePlaneFactor;
         }
 
         if (_dataEye != null && _dataEye.State == DataChannel.ChannelState.Open)
@@ -287,19 +315,29 @@ public class PCReceiver : MonoBehaviour
 
         if(_shouldRenderDepth)
         {
-            int limiterResult = _depthLimiterCounter % _depthLimiter;
+            if (!_isCheckingDepth) StartCoroutine(SetNewDepth());
+            /*int limiterResult = _depthLimiterCounter % _depthLimiter;
             if(limiterResult == 0)
             {
-                _depthTex.LoadImage(_depthMessage);
-                PlaneLeft.GetComponent<Renderer>().material.SetTexture("_DepthPlane", _depthTex);
-                _depthTexRight.LoadImage(_depthMessageRight);
-                PlaneRight.GetComponent<Renderer>().material.SetTexture("_DepthPlane", _depthTexRight);
-                _depthLimiterCounter = 1;
+                
             } else
             {
                 _depthLimiterCounter++;
-            }
+            }*/
         }
+    }
+
+    IEnumerator SetNewDepth()
+    {
+        _isCheckingDepth = true;
+        yield return new WaitForSeconds(0.04f);
+        _depthTex.LoadImage(_depthMessage);
+        PlaneLeft.GetComponent<Renderer>().material.SetTexture("_DepthPlane", _depthTex);
+        _depthTexRight.LoadImage(_depthMessageRight);
+        PlaneRight.GetComponent<Renderer>().material.SetTexture("_DepthPlane", _depthTexRight);
+        //_depthLimiterCounter = 1;
+
+        _isCheckingDepth = false;
     }
 
     public static Vector3 StringToVector3(string sVector)
