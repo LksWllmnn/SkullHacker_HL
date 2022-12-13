@@ -18,6 +18,7 @@ public class PCSender : MonoBehaviour
     private DataChannel _dataVelo;
     private DataChannel _dataDepth;
     private DataChannel _dataDepthRight;
+    private DataChannel _dataScalePlane;
 
     private bool _isPeerInitialized = false;
     private bool _camRemoting = false;
@@ -60,6 +61,9 @@ public class PCSender : MonoBehaviour
     public DepthTextureExtractor DepthTextureRight;
     private bool _sendDepth = false;
 
+    private bool _sendPlaneScale = false;
+    private float _scalePlaneFactor;
+
     private void initPeer()
     {
         PC.Peer.DataChannelAdded += this.OnDataChannelAdded;
@@ -80,8 +84,6 @@ public class PCSender : MonoBehaviour
         Task<DataChannel> veloChannel = PC.Peer.AddDataChannelAsync(44, "veloChannel", false, false);
         veloChannel.Wait();
 
-        
-
         if (ActivateDepthInfo)
         {
             Task<DataChannel> depthChannel = PC.Peer.AddDataChannelAsync(45, "depthChannel", false, false);
@@ -90,7 +92,9 @@ public class PCSender : MonoBehaviour
             Task<DataChannel> depthRightChannel = PC.Peer.AddDataChannelAsync(46, "depthRightChannel", false, false);
             depthRightChannel.Wait();
         }
-        
+
+        Task<DataChannel> planeScaleChannel = PC.Peer.AddDataChannelAsync(47, "planeScaleChannel", false, false);
+        planeScaleChannel.Wait();
     }
 
     private void OnDataChannelAdded(DataChannel channel)
@@ -129,6 +133,10 @@ public class PCSender : MonoBehaviour
             case "depthRightChannel":
                 _dataDepthRight = channel;
                 _dataDepthRight.StateChanged += this.OnStateChangedDepthRight;
+                break;
+            case "planeScaleChannel":
+                _dataScalePlane = channel;
+                _dataScalePlane.StateChanged += this.OnStateChangedScalePlane;
                 break;
         }
     }
@@ -179,7 +187,16 @@ public class PCSender : MonoBehaviour
     private void OnStateChangedDepthRight()
     {
         Debug.Log("DepthRight: " + _dataDepthRight.State);
-        
+    }
+
+    private void OnStateChangedScalePlane()
+    {
+        Debug.Log("PlaneScale: " + _dataScalePlane.State);
+
+        if( _dataScalePlane.State == DataChannel.ChannelState.Open)
+        {
+            _sendPlaneScale = true;
+        }
     }
 
     private void PeerIsConnected()
@@ -311,6 +328,12 @@ public class PCSender : MonoBehaviour
         {
             _dataDepth.SendMessage(DepthTexture.JpgSample);
             _dataDepthRight.SendMessage(DepthTextureRight.JpgSample);
+        }
+
+        if(_sendPlaneScale)
+        {
+            _scalePlaneFactor = 2 * Vector3.Distance(Model.transform.position, Head.transform.position);
+            _dataScalePlane.SendMessage(Encoding.UTF8.GetBytes(_scalePlaneFactor.ToString("F3")));
         }
     }
 
