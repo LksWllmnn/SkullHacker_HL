@@ -13,6 +13,7 @@ Shader "Unlit/VlahosRight"
     {
         Tags {"Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" }
         ZWrite Off
+        ZTEst LEqual
         Blend SrcAlpha OneMinusSrcAlpha
         Cull front
         LOD 100

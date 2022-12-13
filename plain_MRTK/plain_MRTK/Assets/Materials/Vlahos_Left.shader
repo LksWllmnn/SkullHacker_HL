@@ -13,6 +13,7 @@ Shader "Unlit/VlahosLeft"
     {
         Tags {"Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" }
         ZWrite Off
+        ZTEst LEqual
         Blend SrcAlpha OneMinusSrcAlpha
         Cull front
         LOD 100
@@ -22,6 +23,7 @@ Shader "Unlit/VlahosLeft"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            
             // make fog work
             #pragma multi_compile_fog
 

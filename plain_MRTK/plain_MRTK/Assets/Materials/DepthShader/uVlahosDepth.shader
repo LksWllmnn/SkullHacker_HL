@@ -47,7 +47,7 @@ Shader "Unlit/uVlahosDepth"
 
         struct fragOutput {
             fixed4 color : SV_Target;
-            float depth : SV_Depth;
+            fixed depth : SV_Depth;
         };
 
         sampler2D _YPlane;

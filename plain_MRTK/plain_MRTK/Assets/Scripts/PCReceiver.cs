@@ -8,6 +8,7 @@ using UnityEngine.XR.OpenXR;
 using Microsoft.MixedReality.Toolkit.XRSDK.OpenXR;
 using System;
 using Microsoft.MixedReality.Toolkit.Input;
+using Microsoft.MixedReality.WebRTC.Unity;
 
 public class PCReceiver : MonoBehaviour
 {
@@ -54,7 +55,15 @@ public class PCReceiver : MonoBehaviour
     public Material MatLeft;
     [Tooltip("Material from the right side Plane.")]
     public Material MatRight;
+    /*[Tooltip("Material from the left side Plane Depth.")]
+    public Material DepthMatLeft;
+    [Tooltip("Material from the right side Plane Depth.")]
+    public Material DepthMatRight;
 
+    public VideoRenderer LeftVidRenderer;
+    public VideoRenderer RightVidRenderer;*/
+
+    
     [Tooltip("Shader which calculates Depth into the local Scene from the remote Object for the left eye.")]
     public Shader DepthLeft;
     [Tooltip("Shader which calculates Depth into the local Scene from the remote Object for the right eye.")]
@@ -63,6 +72,9 @@ public class PCReceiver : MonoBehaviour
     public Shader NormLeft;
     [Tooltip("Shader which doesn't calculates Depth into the local Scene from the remote Object for the right eye.")]
     public Shader NormRight;
+
+    private int _depthLimiter = 4;
+    private int _depthLimiterCounter = 1;
 
     private void Start()
     {
@@ -102,6 +114,22 @@ public class PCReceiver : MonoBehaviour
             depthRightChannel.Wait();
         }
         
+    }
+
+    public void SetMaterial()
+    {
+        if(ShouldAddDepth)
+        {
+            PlaneLeft.GetComponent<Renderer>().material.shader = DepthLeft;
+            PlaneRight.GetComponent<Renderer>().material.shader = DepthRight;
+            _shouldRenderDepth = true;
+        }
+        else
+        {
+            PlaneLeft.GetComponent<Renderer>().material.shader = NormLeft;
+            PlaneRight.GetComponent<Renderer>().material.shader = NormRight;
+            _shouldRenderDepth = false;
+        }
     }
 
     private void OnDataChannelAdded(DataChannel channel)
@@ -223,28 +251,12 @@ public class PCReceiver : MonoBehaviour
         Material[] emptyArray = new Material[0];
         RepresentationObject.GetComponent<MeshRenderer>().materials = emptyArray;
     }
-
-    public void SwitchMat()
-    {
-        if(_shouldRenderDepth)
-        {
-            PlaneLeft.GetComponent<Renderer>().material.shader = DepthLeft;
-            PlaneRight.GetComponent<Renderer>().material.shader = DepthRight;
-            _shouldRenderDepth = false;
-        } else
-        {
-            PlaneLeft.GetComponent<Renderer>().material.shader = NormLeft;
-            PlaneRight.GetComponent<Renderer>().material.shader = NormRight;
-            _shouldRenderDepth = true;
-        }
-    }
     
     void Update()
     {
-        
         if (_dataDummy != null && _dataDummy.State == DataChannel.ChannelState.Open)
         {
-            _dataDummy.SendMessage(Encoding.ASCII.GetBytes(Cam.transform.rotation.ToString("F3") + "|" + Cam.transform.position.ToString("F3")));
+            _dataDummy.SendMessage(Encoding.ASCII.GetBytes(Cam.transform.rotation.ToString("F4") + "|" + Cam.transform.position.ToString("F4")));
         }
 
         if (_dataObj != null && _dataObj.State == DataChannel.ChannelState.Open && _isScaleSet)
@@ -275,13 +287,19 @@ public class PCReceiver : MonoBehaviour
 
         if(_shouldRenderDepth)
         {
-            _depthTex.LoadImage(_depthMessage);
-            PlaneLeft.GetComponent<Renderer>().material.SetTexture("_DepthPlane", _depthTex);
-
-            _depthTexRight.LoadImage(_depthMessageRight);
-            PlaneRight.GetComponent<Renderer>().material.SetTexture("_DepthPlane", _depthTexRight);
+            int limiterResult = _depthLimiterCounter % _depthLimiter;
+            if(limiterResult == 0)
+            {
+                _depthTex.LoadImage(_depthMessage);
+                PlaneLeft.GetComponent<Renderer>().material.SetTexture("_DepthPlane", _depthTex);
+                _depthTexRight.LoadImage(_depthMessageRight);
+                PlaneRight.GetComponent<Renderer>().material.SetTexture("_DepthPlane", _depthTexRight);
+                _depthLimiterCounter = 1;
+            } else
+            {
+                _depthLimiterCounter++;
+            }
         }
-        
     }
 
     public static Vector3 StringToVector3(string sVector)

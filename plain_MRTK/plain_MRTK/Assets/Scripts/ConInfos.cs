@@ -10,67 +10,37 @@ using Microsoft.MixedReality.Toolkit.Experimental.UI;
 public class ConInfos : MonoBehaviour
 {
     public NodeDssSignaler Signaler;
+    public PCReceiver PcR;
     public GameObject LocalID;
     public GameObject RemoteID;
     public GameObject IPID;
+    public GameObject DepthTextGo;
+    public GameObject NoDepthTextGo;
 
     public TouchScreenKeyboard Keyboard;
 
-    private bool _isLocalIDWriting = false;
-    private bool _isRemoteIDWriting = false;
-    private bool _isIPIDWriting = false;
+    private bool _depthSelection;
 
-    MixedRealityKeyboard _keyb;
-
-    public void WriteLocalID()
-    {
-        _isLocalIDWriting = true;
-        _isRemoteIDWriting = false;
-        _isIPIDWriting = false;
-        Keyboard = TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false, false, false, false);
-    }
-
-    public void WriteRemoteID()
-    {
-        _isLocalIDWriting = false;
-        _isRemoteIDWriting = true;
-        _isIPIDWriting = false;
-        Keyboard = TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false, false, false, false);
-    }
-
-    public void WriteIPID()
-    {
-        _isLocalIDWriting = false;
-        _isRemoteIDWriting = false;
-        _isIPIDWriting = true;
-        Keyboard = TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default, false, false, false, false);
-    }
     
     public void Safe()
     {
         Signaler.LocalPeerId = LocalID.GetComponent<TextMesh>().text;
         Signaler.RemotePeerId = RemoteID.GetComponent<TextMesh>().text;
         Signaler.HttpServerAddress = "http://"+ IPID.GetComponent<TextMesh>().text + ":3000/";
+        PcR.ShouldAddDepth = _depthSelection;
     }
 
-    private void Update()
+    public void SelectDepthVersion()
     {
-        if (Keyboard != null && _isLocalIDWriting)
-        {
-            LocalID.GetComponent<TextMesh>().text = Keyboard.text;
-            // Do stuff with keyboardText
-        }
+        _depthSelection = true;
+        DepthTextGo.GetComponent<TextMesh>().color = Color.green;
+        NoDepthTextGo.GetComponent<TextMesh>().color = Color.white;
+    }
 
-        if (Keyboard != null && _isRemoteIDWriting)
-        {
-            RemoteID.GetComponent<TextMesh>().text = Keyboard.text;
-            // Do stuff with keyboardText
-        }
-
-        if (Keyboard != null && _isIPIDWriting)
-        {
-            IPID.GetComponent<TextMesh>().text = Keyboard.text;
-            // Do stuff with keyboardText
-        }
+    public void SelectNoDepthVersion()
+    {
+        _depthSelection = false;
+        DepthTextGo.GetComponent<TextMesh>().color = Color.white;
+        NoDepthTextGo.GetComponent<TextMesh>().color = Color.green;
     }
 }

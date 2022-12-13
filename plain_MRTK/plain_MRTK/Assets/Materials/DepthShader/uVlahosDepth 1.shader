@@ -1,4 +1,4 @@
-Shader "Unlit/Vlahos_Right_Depth"
+Shader "Unlit/uVlahosDepth"
 {
     Properties
     {
@@ -11,29 +11,29 @@ Shader "Unlit/Vlahos_Right_Depth"
         _a1("a1", float) = 0
         _a2("a2", float) = 1
     }
-        SubShader
+    SubShader
+    {
+        Tags { "RenderType" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent"}
+        Blend SrcAlpha OneMinusSrcAlpha
+        Cull front
+        LOD 100
+
+        Pass
         {
-            Tags { "RenderType" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent"}
-            Blend SrcAlpha OneMinusSrcAlpha
-            Cull front
-            LOD 100
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            // make fog work
+            #pragma multi_compile_fog
 
-            Pass
+            #include "UnityCG.cginc"
+
+            struct appdata
             {
-                CGPROGRAM
-                #pragma vertex vert
-                #pragma fragment frag
-                // make fog work
-                #pragma multi_compile_fog
-
-                #include "UnityCG.cginc"
-
-                struct appdata
-                {
-                    float4 vertex : POSITION;
-                    float2 uv : TEXCOORD0;
-                    UNITY_VERTEX_INPUT_INSTANCE_ID
-                };
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
+            };
 
             struct v2f
             {
@@ -43,11 +43,6 @@ Shader "Unlit/Vlahos_Right_Depth"
                 float4 vertex : SV_POSITION;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
-            };
-
-            struct fragOutput {
-                fixed4 color : SV_Target;
-                fixed depth : SV_Depth;
             };
 
             sampler2D _YPlane;
@@ -77,7 +72,7 @@ Shader "Unlit/Vlahos_Right_Depth"
                 o.uv2 = TRANSFORM_TEX(v.uv, _DepthPlane);
                 UNITY_TRANSFER_FOG(o, o.vertex);
 
-                //o.uv.y = 1 - v.uv.y;
+                o.uv.y = 1 - v.uv.y;
                 o.uv.x = 1 - v.uv.x;
                 o.uv2.x = 1 - v.uv.x;
                 return o;
@@ -96,11 +91,11 @@ Shader "Unlit/Vlahos_Right_Depth"
                 return half3(r, g, b);
             }
 
-            fragOutput frag(in v2f i)
+            fixed4 frag(in v2f i) : SV_Target
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 
-                fragOutput o;
+                //fragOutput o;
 
                 fixed4 depthBack = tex2D(_DepthPlane, i.uv2);
 
@@ -115,26 +110,19 @@ Shader "Unlit/Vlahos_Right_Depth"
                 fixed3 rgb = yuv2rgb(yuv);
                 fixed4 col = fixed4(rgb[0], rgb[1], rgb[2], 1);
 
-                if (unity_StereoEyeIndex == 1) {
+                if (unity_StereoEyeIndex == 0) {
 
                     //https://smirnov-am.github.io/chromakeying/
                     alpha = 1 - _a1 * (col[1] - _a2 * col[2]);
-                    o.color = fixed4(col[0], col[1], col[2], alpha);
-                    //if(alpha>0.1) o.depth = depthBack[0];
-                    o.depth = alpha * depthBack[0];
-                    return o;
+                    UNITY_OUTPUT_DEPTH(alpha * depthBack[0]);
+                    return fixed4(col[0], col[1], col[2], alpha);;
                 }
                 else {
-                    o.color = fixed4(0, 0, 0, 0);
-                    o.depth = 0;
-                    return o;
+                    UNITY_OUTPUT_DEPTH(0);
+                    return fixed4(0, 0, 0, 0);;
                 }
-
-                //o.depth = (log(c * i.position.z + 1) / log(c * far + 1) * i.position.w);
-
-                return o;
             }
-                ENDCG
-            }
+            ENDCG
         }
+    }
 }
