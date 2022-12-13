@@ -82,17 +82,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32f1b44f6c0b65147a8dcb36d38a147e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pc: {fileID: 4504632618331161087}
-  head: {fileID: 4545599445755601019}
-  stereoSeperation: 0.022
-  calcSep: 0
-  model: {fileID: 0}
-  veloFaktor: 5
-  addedFactor: 0
-  rotationIsStatic: 1
-  activateDepthInfo: 1
-  depthTexture: {fileID: 6153316282415745125}
-  depthTextureRight: {fileID: 297081293939200493}
+  PC: {fileID: 4504632618331161087}
+  Head: {fileID: 4545599445755601019}
+  StereoSeperation: 0.015
+  Model: {fileID: 0}
+  VeloFaktor: 1
+  AddedFactor: 0
+  RotationIsStatic: 1
+  ActivateDepthInfo: 1
+  DepthTexture: {fileID: 6153316282415745125}
+  DepthTextureRight: {fileID: 297081293939200493}
 --- !u!1 &4545599444715521686
 GameObject:
   m_ObjectHideFlags: 0
@@ -325,12 +324,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66568e2658f844e41a77eb10382ecc1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cam: {fileID: 4545599445514953642}
-  mat: {fileID: 2100000, guid: a2f45cf7745ba3e44a949aca442d381a, type: 2}
-  DepthLevel: 3
-  _rTex: {fileID: 0}
-  sendTex: {fileID: 0}
-  jpgSample: 
+  Cam: {fileID: 4545599445514953642}
+  Mat: {fileID: 2100000, guid: a2f45cf7745ba3e44a949aca442d381a, type: 2}
+  RTex: {fileID: 0}
+  JpgSample: 
 --- !u!1 &4545599445532669131
 GameObject:
   m_ObjectHideFlags: 0
@@ -579,12 +576,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66568e2658f844e41a77eb10382ecc1e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _cam: {fileID: 4545599446402679203}
-  mat: {fileID: 2100000, guid: a2f45cf7745ba3e44a949aca442d381a, type: 2}
-  DepthLevel: 3
-  _rTex: {fileID: 0}
-  sendTex: {fileID: 0}
-  jpgSample: 
+  Cam: {fileID: 4545599446402679203}
+  Mat: {fileID: 2100000, guid: a2f45cf7745ba3e44a949aca442d381a, type: 2}
+  RTex: {fileID: 0}
+  JpgSample: 
 --- !u!1 &5625970402111905200
 GameObject:
   m_ObjectHideFlags: 0

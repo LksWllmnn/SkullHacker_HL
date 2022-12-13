@@ -4,7 +4,6 @@ Shader "Custom/depthShader"
 {
     Properties
     {
-        _DepthLevel("Depth Level", Range(1, 3)) = 2 
     }
     SubShader
     {
@@ -18,7 +17,6 @@ Shader "Custom/depthShader"
             #include "UnityCG.cginc"
 
             uniform sampler2D_float _CameraDepthTexture;
-            uniform fixed _DepthLevel;
             uniform half4 _MainTex_TexelSize;
 
             struct uinput
@@ -44,7 +42,6 @@ Shader "Custom/depthShader"
             fixed4 frag(uoutput o) : COLOR
             {
                 float depth = UNITY_SAMPLE_DEPTH(tex2D(_CameraDepthTexture, o.uv));
-                //depth = pow(Linear01Depth(depth), _DepthLevel);
                 return depth;
             }
 
