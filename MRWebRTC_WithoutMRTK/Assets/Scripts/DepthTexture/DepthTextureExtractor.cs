@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Threading.Tasks;
+using System.Collections;
 
 [RequireComponent(typeof(Camera))]
 public class DepthTextureExtractor : MonoBehaviour
@@ -10,6 +12,9 @@ public class DepthTextureExtractor : MonoBehaviour
     [HideInInspector]public RenderTexture RTex;
     private Texture2D _sendTex;
     [HideInInspector]public byte[] JpgSample;
+    [HideInInspector] public bool ShouldRenderDepth = false;
+
+    private bool _isSettingDepth = false;
 
     private Texture2D _rTex2Tex2D;
 
@@ -21,8 +26,11 @@ public class DepthTextureExtractor : MonoBehaviour
 
     void Update()
     {
-        _sendTex = ToTexture2D(RTex);
-        JpgSample = _sendTex.EncodeToJPG();
+        if(ShouldRenderDepth)
+        {
+            if (!_isSettingDepth) StartCoroutine(GetDepthAsTexture());
+        }
+        
     }
 
     void OnRenderImage(RenderTexture source, RenderTexture destination)
@@ -39,5 +47,14 @@ public class DepthTextureExtractor : MonoBehaviour
         _rTex2Tex2D.ReadPixels(new Rect(0, 0, rTex.width, rTex.height), 0, 0);
         _rTex2Tex2D.Apply();
         return _rTex2Tex2D;
+    }
+
+    IEnumerator GetDepthAsTexture()
+    {
+        _isSettingDepth = true;
+        yield return new WaitForSeconds(0.04f);
+        _sendTex = ToTexture2D(RTex);
+        JpgSample = _sendTex.EncodeToJPG();
+        _isSettingDepth = false;
     }
 }

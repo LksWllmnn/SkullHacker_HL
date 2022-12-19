@@ -242,12 +242,17 @@ public class PCSender : MonoBehaviour
 
     private void OnMessageReceivedEye(byte[] message)
     {
-        //Debug.Log(Encoding.UTF8.GetString(message));
-        //string messageString = Encoding.UTF8.GetString(message);
+        string[] oneTimeString = Encoding.UTF8.GetString(message).Split("|");
         try
         {
-            //messageString.Replace(",", ".");
+            string eyeSep = oneTimeString[0];
+            eyeSep.Replace(",", ".");
             //stereoSeperation = float.Parse(messageString);
+            
+            string shouldRenderDepth = oneTimeString[1];
+            if (shouldRenderDepth == "True") _sendDepth = true;
+            else _sendDepth = false;
+            
             _setEyes = true;
         }
         catch (Exception e)
@@ -326,8 +331,14 @@ public class PCSender : MonoBehaviour
 
         if(_sendDepth)
         {
+            DepthTexture.ShouldRenderDepth = true;
+            DepthTextureRight.ShouldRenderDepth = true;
             _dataDepth.SendMessage(DepthTexture.JpgSample);
             _dataDepthRight.SendMessage(DepthTextureRight.JpgSample);
+        } else
+        {
+            DepthTexture.ShouldRenderDepth = false;
+            DepthTextureRight.ShouldRenderDepth = false;
         }
 
         if(_sendPlaneScale)

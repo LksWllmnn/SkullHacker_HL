@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Microsoft.MixedReality.WebRTC.Unity;
+using Microsoft.MixedReality.WebRTC;
 using UnityEngine.UI;
+using PeerConnection = Microsoft.MixedReality.WebRTC.Unity.PeerConnection;
 
 public class ConnectionHandler : MonoBehaviour
 {
@@ -55,30 +57,48 @@ public class ConnectionHandler : MonoBehaviour
         newConNodeDSSSignaler.LocalPeerId = con.SenderId;
         newConNodeDSSSignaler.RemotePeerId = con.ReceiverId;
         newConNodeDSSSignaler.HttpServerAddress = "http://" + ConnectionIPInput.GetComponent<TMPro.TMP_InputField>().text + ":3000/";
+
+        con.SetState(ConnectionState.Open);
     }
 
-    public void Deconnect(Connection con)
+    public void Deconnect(Connection con, bool reConnect)
     {
+        con.Peer.IceStateChanged -= con.LogIceState;
         GameObject conGo = ConnectionGos[con.Index];
         PeerConnection goPc = conGo.transform.GetChild(0).gameObject.GetComponent<PeerConnection>();
-
         goPc.gameObject.SetActive(false);
         Destroy(conGo);
         ConnectionGos[con.Index] = null;
+        con.Peer = null;
+        con.SetState(ConnectionState.Closed);
+        
+        if (reConnect) InstanziateConnection(con);
     }
 
     private void Update()
     {
         for(int i = 0; i<ConnectionGos.Count; i++)
         {
-            if(ConnectionGos[i] != null && Connections[i].IsConnected == false)
+            if(ConnectionGos[i] != null)
             {
                 GameObject conGo = ConnectionGos[i];
                 PeerConnection pc = conGo.transform.GetChild(0).gameObject.GetComponent<PeerConnection>();
-                if(pc.Peer.IsConnected == true)
+                if (Connections[i].Peer == null && pc.Peer != null)
                 {
-                    Connections[i].SetConnectedText();
-                    Connections[i].IsConnected = true;
+                    Connections[i].Peer = pc.Peer;
+                    Connections[i].Peer.IceStateChanged += Connections[i].LogIceState;
+                }
+
+                if (Connections[i].IsConnected == true && Connections[i].WasConnected == false)
+                {
+                    Connections[i].SetState(ConnectionState.Connected);
+                    Connections[i].WasConnected = true;
+                }
+                else if(Connections[i].IsConnected == false && Connections[i].WasConnected == true)
+                {
+                    Connections[i].SetState(ConnectionState.Closed);
+                    Deconnect(Connections[i], true);
+                    Connections[i].WasConnected = false;
                 }
             }
         }
@@ -93,10 +113,13 @@ public class Connection
     public string ReceiverId;
     public string Status;
     public int Index;
+    public bool WasConnected = false;
     public bool IsConnected = false;
+    public Microsoft.MixedReality.WebRTC.PeerConnection Peer;
+    private ConnectionState _state = ConnectionState.Closed;
+    
+    
     private ConnectionHandler _conHandler;
-    private PeerConnection _peerConnection;
-
 
     public event Notify PcConnected;
 
@@ -110,6 +133,41 @@ public class Connection
         _conHandler = conHandler;
     }
 
+    public void LogIceState(IceConnectionState state)
+    {
+        switch(state)
+        {
+            case IceConnectionState.Connected:
+                this.IsConnected = true;
+                break;
+            case IceConnectionState.Disconnected:
+                this.IsConnected= false;
+                break;
+        }
+    }
+
+    public ConnectionState GetState()
+    {
+        return this._state;
+    }
+
+    public void SetState(ConnectionState state)
+    {
+        this._state = state;
+        switch (state)
+        {
+            case ConnectionState.Connected:
+                this.SetConnectedText();
+                break;
+            case ConnectionState.Closed:
+                this.SetDisconnected();
+                break;
+            case ConnectionState.Open:
+                this.SetOpenText();
+                break;
+        }
+    }
+
     public void ActivateConnection()
     {
         _conHandler.InstanziateConnection(this);
@@ -117,18 +175,27 @@ public class Connection
 
     public void DeactivateConnection()
     {
-        _conHandler.Deconnect(this);
+        _conHandler.Deconnect(this, false);
     }
 
-    public void SetPeerConnection(PeerConnection pC)
-    {
-        _peerConnection = pC;
-        _peerConnection.Peer.Connected += SetConnectedText;
-    }
 
-    public virtual void SetConnectedText()
+    protected virtual void SetOpenText()
     {
-        Debug.Log("Hello Event sth happend");
         PcConnected?.Invoke();
     }
+
+    protected virtual void SetConnectedText()
+    {
+        PcConnected?.Invoke();
+    }
+
+    protected virtual void SetDisconnected()
+    {
+        PcConnected?.Invoke();
+    }
+}
+
+public enum ConnectionState
+{
+    Open, Connected, Closed
 }

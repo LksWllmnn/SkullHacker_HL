@@ -20,7 +20,18 @@ public class ConnectionThumbScript : MonoBehaviour
 
     public void SetConStatTextConnected()
     {
-        SetConnectionStatusText("Connected");
+        switch(Con.GetState())
+        {
+            case ConnectionState.Connected:
+                SetConnectionStatusText("Connected");
+                break;
+            case ConnectionState.Open:
+                SetConnectionStatusText("Open");
+                break;
+            case ConnectionState.Closed:
+                SetConnectionStatusText("Closed");
+                break;
+        }
     }
 
     public void SetSenderText(string text)
@@ -84,7 +95,6 @@ public class ConnectionThumbScript : MonoBehaviour
     {
         Con.DeactivateConnection();
         SetButtonText("activate");
-        SetConnectionStatusText("Closed");
         BackgroundImage.color = new Color(1, 1, 1, 0.2f);
         _isConnected = false;
     }
