@@ -55,7 +55,6 @@ public class PCReceiver : MonoBehaviour
     [Tooltip("Plane on which the information for the right eye is displayed.")]
     public GameObject PlaneRight;
 
-    private bool _shouldRenderDepth;
     [Tooltip("Material from the left side Plane.")]
     public Material MatLeft;
     [Tooltip("Material from the right side Plane.")]
@@ -70,11 +69,11 @@ public class PCReceiver : MonoBehaviour
     [Tooltip("Shader which doesn't calculates Depth into the local Scene from the remote Object for the right eye.")]
     public Shader NormRight;
 
-    private int _depthLimiter = 4;
-    private int _depthLimiterCounter = 1;
     private bool _isCheckingDepth = false;
 
     private float _scalePlaneFactor = 1;
+
+    private bool _sendedOnetimeMessage = false;
 
     private void Start()
     {
@@ -83,8 +82,6 @@ public class PCReceiver : MonoBehaviour
 
         _depthTex = new Texture2D(2, 2);
         _depthTexRight = new Texture2D(2, 2);
-
-        _shouldRenderDepth = ShouldAddDepth;
     }
 
     public void CreateChannels()
@@ -117,6 +114,7 @@ public class PCReceiver : MonoBehaviour
         Task<DataChannel> scalePlaneChannel = PC.Peer.AddDataChannelAsync(47, "scalePlaneChannel", false, false);
         scalePlaneChannel.Wait();
 
+        _sendedOnetimeMessage = false;
     }
 
     public void SetMaterial()
@@ -125,13 +123,11 @@ public class PCReceiver : MonoBehaviour
         {
             PlaneLeft.GetComponent<Renderer>().material.shader = DepthLeft;
             PlaneRight.GetComponent<Renderer>().material.shader = DepthRight;
-            _shouldRenderDepth = true;
         }
         else
         {
             PlaneLeft.GetComponent<Renderer>().material.shader = NormLeft;
             PlaneRight.GetComponent<Renderer>().material.shader = NormRight;
-            _shouldRenderDepth = false;
         }
     }
 
@@ -293,9 +289,10 @@ public class PCReceiver : MonoBehaviour
             CalcDistRight.ScaleFactor = _scalePlaneFactor;
         }
 
-        if (_dataEye != null && _dataEye.State == DataChannel.ChannelState.Open)
+        if (_dataEye != null && _dataEye.State == DataChannel.ChannelState.Open && _sendedOnetimeMessage == false)
         {
-            _dataEye.SendMessage(Encoding.ASCII.GetBytes("" + Cam.stereoSeparation));
+            _dataEye.SendMessage(Encoding.ASCII.GetBytes("" + Cam.stereoSeparation + "|" + ShouldAddDepth));
+            _sendedOnetimeMessage = true;
         }
 
         if (_dataVelo != null && _dataVelo.State == DataChannel.ChannelState.Open)
@@ -313,17 +310,9 @@ public class PCReceiver : MonoBehaviour
             _setBounds = false;
         }
 
-        if(_shouldRenderDepth)
+        if(ShouldAddDepth)
         {
             if (!_isCheckingDepth) StartCoroutine(SetNewDepth());
-            /*int limiterResult = _depthLimiterCounter % _depthLimiter;
-            if(limiterResult == 0)
-            {
-                
-            } else
-            {
-                _depthLimiterCounter++;
-            }*/
         }
     }
 
