@@ -64,6 +64,9 @@ public class PCSender : MonoBehaviour
     private bool _sendPlaneScale = false;
     private float _scalePlaneFactor;
 
+    public bool DualPlanePositionSystem;
+    private bool _closeToObject;
+
     private void initPeer()
     {
         PC.Peer.DataChannelAdded += this.OnDataChannelAdded;
@@ -311,6 +314,22 @@ public class PCSender : MonoBehaviour
             } else
             {
                 Head.transform.LookAt(Model.transform.GetChild(0).transform.position);
+            }
+
+            if(DualPlanePositionSystem)
+            {
+                Vector3 activeModelScaling = Matrix4x4.Scale(Model.transform.GetChild(0).transform.localScale) * Model.transform.GetChild(0).GetChild(0).GetComponent<MeshFilter>().sharedMesh.bounds.extents * 2;
+                
+                if (Vector3.Distance(Head.transform.position, Model.transform.position) < Mathf.Max(activeModelScaling.x, activeModelScaling.z)) _closeToObject = true;
+                else _closeToObject = false;
+                
+                if (_closeToObject)
+                {
+                    RotationIsStatic = false;
+                } else
+                {
+                    RotationIsStatic = true;
+                }
             }
 
             AddedFactor = ((_camPosVelo.magnitude - _lastCamposVelo.magnitude)/Time.deltaTime) * VeloFaktor;

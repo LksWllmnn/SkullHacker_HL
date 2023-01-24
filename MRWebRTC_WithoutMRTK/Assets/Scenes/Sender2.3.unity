@@ -1763,7 +1763,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ConnectionGos: []
-  ConnectionPrefab: {fileID: 5625970402111905200, guid: ef2864b7837dd764f8b6e3a5109764b9, type: 3}
+  ConnectionPrefab: {fileID: 5625970402111905200, guid: f906ff00b53bfd24195e6d62798c5bed, type: 3}
   Model: {fileID: 813027548}
   ConnectionIPInput: {fileID: 1242907997}
   ConnectionThumbPrefab: {fileID: 4153974516982030181, guid: 363b5df43329d764881e79203ca006c3, type: 3}

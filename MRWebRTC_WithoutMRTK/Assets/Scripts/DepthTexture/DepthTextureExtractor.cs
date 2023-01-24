@@ -29,6 +29,9 @@ public class DepthTextureExtractor : MonoBehaviour
         if(ShouldRenderDepth)
         {
             if (!_isSettingDepth) StartCoroutine(GetDepthAsTexture());
+            /*_sendTex = ToTexture2D(RTex);
+            JpgSample = _sendTex.EncodeToJPG();
+            _isSettingDepth = false;*/
         }
         
     }
@@ -52,7 +55,7 @@ public class DepthTextureExtractor : MonoBehaviour
     IEnumerator GetDepthAsTexture()
     {
         _isSettingDepth = true;
-        yield return new WaitForSeconds(0.04f);
+        yield return new WaitForSeconds(0.00f);
         _sendTex = ToTexture2D(RTex);
         JpgSample = _sendTex.EncodeToJPG();
         _isSettingDepth = false;

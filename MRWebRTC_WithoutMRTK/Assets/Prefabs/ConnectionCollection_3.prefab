@@ -92,6 +92,7 @@ MonoBehaviour:
   ActivateDepthInfo: 1
   DepthTexture: {fileID: 6153316282415745125}
   DepthTextureRight: {fileID: 297081293939200493}
+  DualPlanePositionSystem: 0
 --- !u!1 &4545599444715521686
 GameObject:
   m_ObjectHideFlags: 0
@@ -328,6 +329,7 @@ MonoBehaviour:
   Mat: {fileID: 2100000, guid: a2f45cf7745ba3e44a949aca442d381a, type: 2}
   RTex: {fileID: 0}
   JpgSample: 
+  ShouldRenderDepth: 0
 --- !u!1 &4545599445532669131
 GameObject:
   m_ObjectHideFlags: 0
@@ -580,6 +582,7 @@ MonoBehaviour:
   Mat: {fileID: 2100000, guid: a2f45cf7745ba3e44a949aca442d381a, type: 2}
   RTex: {fileID: 0}
   JpgSample: 
+  ShouldRenderDepth: 0
 --- !u!1 &5625970402111905200
 GameObject:
   m_ObjectHideFlags: 0

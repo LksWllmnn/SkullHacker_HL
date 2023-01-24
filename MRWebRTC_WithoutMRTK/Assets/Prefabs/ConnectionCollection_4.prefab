@@ -84,15 +84,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   PC: {fileID: 4504632618331161087}
   Head: {fileID: 4545599445755601019}
-  StereoSeperation: 0.022
+  StereoSeperation: 0.015
   Model: {fileID: 0}
   VeloFaktor: 1
   AddedFactor: 0
-  RotationIsStatic: 0
+  RotationIsStatic: 1
   ActivateDepthInfo: 1
-  DepthTexture: {fileID: 3251756477822117898}
-  DepthTextureRight: {fileID: 7649187209575563502}
-  DualPlanePositionSystem: 0
+  DepthTexture: {fileID: 6153316282415745125}
+  DepthTextureRight: {fileID: 297081293939200493}
+  DualPlanePositionSystem: 1
   _closeToObject: 0
 --- !u!1 &4545599444715521686
 GameObject:
@@ -232,7 +232,7 @@ GameObject:
   - component: {fileID: 4545599445514953642}
   - component: {fileID: 4545599445514953644}
   - component: {fileID: 4545599445514953643}
-  - component: {fileID: 7649187209575563502}
+  - component: {fileID: 297081293939200493}
   m_Layer: 0
   m_Name: StreamCam_Right
   m_TagString: Untagged
@@ -314,7 +314,7 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4545599445514953641}
   m_Enabled: 0
---- !u!114 &7649187209575563502
+--- !u!114 &297081293939200493
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -485,7 +485,7 @@ GameObject:
   - component: {fileID: 4545599446402679203}
   - component: {fileID: 4545599446402679202}
   - component: {fileID: 4545599446402679201}
-  - component: {fileID: 3251756477822117898}
+  - component: {fileID: 6153316282415745125}
   m_Layer: 0
   m_Name: StreamCam_Left
   m_TagString: Untagged
@@ -567,7 +567,7 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4545599446402679200}
   m_Enabled: 0
---- !u!114 &3251756477822117898
+--- !u!114 &6153316282415745125
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -594,7 +594,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9087254655021175817}
   m_Layer: 0
-  m_Name: ConnectionCollection_2
+  m_Name: ConnectionCollection_4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
