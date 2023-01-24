@@ -285,8 +285,15 @@ public class PCReceiver : MonoBehaviour
             Vector3 normalizedScale = new Vector3(RepresentationObject.transform.localScale.x / _standartScale.x, RepresentationObject.transform.localScale.y / _standartScale.y, RepresentationObject.transform.localScale.z / _standartScale.z);
             _dataObj.SendMessage(Encoding.ASCII.GetBytes(RepresentationObject.transform.position.ToString("F3") + "|" + RepresentationObject.transform.rotation.ToString("F3") + "|" + normalizedScale.ToString("F3")));
 
-            CalcDistLeft.ScaleFactor = _scalePlaneFactor;
-            CalcDistRight.ScaleFactor = _scalePlaneFactor;
+            try
+            {
+                CalcDistLeft.ScaleFactor = _scalePlaneFactor;
+                CalcDistRight.ScaleFactor = _scalePlaneFactor;
+            } catch (Exception e)
+            {
+                Debug.Log("No CalcDist on Plane");
+            }
+            
         }
 
         if (_dataEye != null && _dataEye.State == DataChannel.ChannelState.Open && _sendedOnetimeMessage == false)

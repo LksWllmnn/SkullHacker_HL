@@ -116,8 +116,6 @@ Shader "Unlit/uVlahosDepth"
             fixed4 col = fixed4(rgb[0], rgb[1], rgb[2], 1);
 
             if (unity_StereoEyeIndex == 0) {
-
-                //https://smirnov-am.github.io/chromakeying/
                 alpha = 1 - _a1 * (col[1] - _a2 * col[2]);
                 o.color = fixed4(col[0], col[1], col[2], alpha);
                 o.depth = alpha * depthBack[0];
@@ -134,4 +132,5 @@ Shader "Unlit/uVlahosDepth"
             ENDCG
         }
     }
+    Fallback "Transparent/VertexLit"
 }
