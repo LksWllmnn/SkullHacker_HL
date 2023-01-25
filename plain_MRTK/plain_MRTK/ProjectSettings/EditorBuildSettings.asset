@@ -6,22 +6,22 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Scenes/RR_NearPlane.unity
+    path: Assets/RR for MARBLE Prototype/Scenes/OldTests/RR_NearPlane.unity
     guid: 96c77b4cbf7408840bcdc8f7635d15b4
   - enabled: 0
-    path: Assets/Scenes/Client2.unity
+    path: Assets/RR for MARBLE Prototype/Scenes/OldTests/Client2.unity
     guid: b46d5c01ea57deb4896c65be2fc3cf0a
   - enabled: 0
-    path: Assets/Scenes/RR_Blitting.unity
+    path: Assets/RR for MARBLE Prototype/Scenes/OldTests/RR_Blitting.unity
     guid: 6daa4c0f80b897e48942b4b6ac85f838
   - enabled: 0
-    path: Assets/Scenes/RR_DistanceOfObjectPlane.unity
+    path: Assets/RR for MARBLE Prototype/Scenes/OldTests/RR_DistanceOfObjectPlane.unity
     guid: 6c3109c1bac451d4dbea1d3bff3f4deb
   - enabled: 1
-    path: Assets/Scenes/RR_DOP_Depth.unity
+    path: Assets/RR for MARBLE Prototype/Scenes/RR_DOP_Depth.unity
     guid: 3df28d0c9d6b7474baa01faffa692e2a
   - enabled: 0
-    path: Assets/Scenes/RR_DOP_Depth_Dual.unity
+    path: Assets/RR for MARBLE Prototype/Scenes/RR_DOP_Depth_Dual.unity
     guid: ec000353977860f41b1eb9d67079a556
   m_configObjects:
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 59713c239b79c5840b4d4327eb15c26c, type: 2}
