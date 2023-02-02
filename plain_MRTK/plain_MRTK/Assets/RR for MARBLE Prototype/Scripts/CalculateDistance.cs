@@ -15,6 +15,7 @@ public class CalculateDistance : MonoBehaviour
     private bool _isChecking = false;
 
     public Vector3 CamPos;
+    public float CamFovHor = 70;
 
     public bool DualSystem;
     private float _scaleVar = 7.9f;
@@ -48,7 +49,7 @@ public class CalculateDistance : MonoBehaviour
                 this.transform.parent = Cam;
                 this.transform.localPosition = _originCamPos;
                 this.transform.localEulerAngles = _originCamRot;
-                this.transform.localScale = origiScale * _scaleVar * Mathf.Tan(Mathf.Deg2Rad * 70.0f / 2);
+                this.transform.localScale = origiScale * _scaleVar * Mathf.Tan(Mathf.Deg2Rad * CamFovHor / 2);
             } else
             {
                 this.transform.parent = _originParent;
@@ -60,7 +61,7 @@ public class CalculateDistance : MonoBehaviour
                 this.transform.LookAt(CamPos);
 
                 //größe der plane anpassen anhand des abstands zum Objekt mithilfe der Kathete https://de.wikipedia.org/wiki/Rechtwinkliges_Dreieck und dann mal 2 da 2x rechtwinkliges dreieck ein gleichschenkliges ergeben
-                this.transform.localScale = origiScale * ScaleFactor * Mathf.Tan(Mathf.Deg2Rad * 70.0f / 2);
+                this.transform.localScale = origiScale * ScaleFactor * Mathf.Tan(Mathf.Deg2Rad * CamFovHor / 2);
                 //this.transform.localScale = origiScale * ScaleFactor * Mathf.Tan(43.0f * Mathf.PI / 180);
             }
         } else
