@@ -95,7 +95,6 @@ Shader "Unlit/uVlahosDepth"
             {
                 UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 
-                //fragOutput o;
 
                 fixed4 depthBack = tex2D(_DepthPlane, i.uv2);
 
@@ -112,7 +111,6 @@ Shader "Unlit/uVlahosDepth"
 
                 if (unity_StereoEyeIndex == 0) {
 
-                    //https://smirnov-am.github.io/chromakeying/
                     alpha = 1 - _a1 * (col[1] - _a2 * col[2]);
                     UNITY_OUTPUT_DEPTH(alpha * depthBack[0]);
                     return fixed4(col[0], col[1], col[2], alpha);;

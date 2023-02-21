@@ -111,7 +111,6 @@ Shader "Unlit/uVlahosDepth"
 
             float alpha = 1;
 
-            // sample the texture
             fixed3 rgb = yuv2rgb(yuv);
             fixed4 col = fixed4(rgb[0], rgb[1], rgb[2], 1);
 

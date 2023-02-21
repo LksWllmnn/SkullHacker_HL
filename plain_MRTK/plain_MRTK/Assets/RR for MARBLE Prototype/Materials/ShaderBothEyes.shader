@@ -61,7 +61,6 @@ Shader "Unlit/testAlpha"
                 o.uv = TRANSFORM_TEX(v.uv, _VPlane);
                 UNITY_TRANSFER_FOG(o,o.vertex);
                 
-                //o.uv.y = 1 - v.uv.y;
                 o.uv.x = 1 - v.uv.x;
                 return o;
             }
@@ -86,11 +85,8 @@ Shader "Unlit/testAlpha"
                 yuv.y = tex2D(_UPlane, i.uv);
                 yuv.z = tex2D(_VPlane, i.uv);
                 
-                // sample the texture
-                //fixed4 col = tex2D(yuv2rgb(yuv), i.uv);
                 fixed3 rgb = yuv2rgb(yuv);
                 fixed4 col = fixed4(rgb[0], rgb[1], rgb[2], 1);
-                //UNITY_APPLY_FOG(i.fogCoord, col);
                 if (col[1] >= 0.89 && col[0] <= 0.1 && col[2] <= 0.1) {
                     return fixed4(col[0], col[1], col[2], 0);
                 }

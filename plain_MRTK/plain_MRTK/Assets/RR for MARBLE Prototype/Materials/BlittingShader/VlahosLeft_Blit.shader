@@ -73,7 +73,6 @@ Shader "Unlit/VlahosLeft_Blit"
                 UNITY_TRANSFER_FOG(o,o.vertex);
 
                 o.uv2.y = 1 - v.uv.y;
-                //o.uv2.x = 1 - v.uv.x;
                 
                 return o;
             }
@@ -110,7 +109,6 @@ Shader "Unlit/VlahosLeft_Blit"
 
                 if (unity_StereoEyeIndex == 0) {
 
-                    //https://smirnov-am.github.io/chromakeying/
                     alpha = 1 - _a1 * (col[1] - _a2 * col[2]);
                     if (alpha > 0.1) {
                         return fixed4(col[0], col[1], col[2], alpha);
@@ -119,7 +117,6 @@ Shader "Unlit/VlahosLeft_Blit"
                         return colBack;
                     }
                     return colBack;
-                    //return fixed4(1, 0, 0, 1);
                     
                 }
                 else {

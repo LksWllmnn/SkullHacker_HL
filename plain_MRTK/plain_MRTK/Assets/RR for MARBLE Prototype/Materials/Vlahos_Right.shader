@@ -101,7 +101,6 @@ Shader "Unlit/VlahosRight"
 
                 if (unity_StereoEyeIndex == 1) {
 
-                    //https://smirnov-am.github.io/chromakeying/
                     alpha = 1 - _a1 * (col[1] - _a2 * col[2]);
                     return fixed4(col[0], col[1], col[2], alpha);
                 }

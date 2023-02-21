@@ -18,7 +18,6 @@ Shader "Custom/Vlahos_Left_Depth"
     {
 
         Tags { "RenderType" = "Opaque" "IgnoreProjector" = "True" "RenderType" = "Transparent"}
-        //Blend SrcAlpha OneMinusSrcAlpha
         Cull front
         LOD 100
 
@@ -121,7 +120,6 @@ Shader "Custom/Vlahos_Left_Depth"
 
                 if (unity_StereoEyeIndex == 0) {
 
-                    //https://smirnov-am.github.io/chromakeying/
                     alpha = 1 - _a1 * (col[1] - _a2 * col[2]);
                     o.color = fixed4(col[0], col[1], col[2], alpha);
                     o.depth = alpha * depthBack[0];

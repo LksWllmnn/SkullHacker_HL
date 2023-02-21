@@ -250,7 +250,6 @@ public class PCSender : MonoBehaviour
         {
             string eyeSep = oneTimeString[0];
             eyeSep.Replace(",", ".");
-            //stereoSeperation = float.Parse(messageString);
             
             string shouldRenderDepth = oneTimeString[1];
             if (shouldRenderDepth == "True") _sendDepth = true;

@@ -331,7 +331,6 @@ public class PCReceiver : MonoBehaviour
         PlaneLeft.GetComponent<Renderer>().material.SetTexture("_DepthPlane", _depthTex);
         _depthTexRight.LoadImage(_depthMessageRight);
         PlaneRight.GetComponent<Renderer>().material.SetTexture("_DepthPlane", _depthTexRight);
-        //_depthLimiterCounter = 1;
 
         _isCheckingDepth = false;
     }

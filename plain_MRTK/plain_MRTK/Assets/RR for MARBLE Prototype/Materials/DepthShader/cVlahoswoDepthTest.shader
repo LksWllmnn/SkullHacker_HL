@@ -51,7 +51,6 @@ Shader "Resources/Shaders/Vlahos_Left_Depth"
 
             struct fragOutput {
                 fixed4 color : SV_Target;
-                //float depth : SV_Depth;
             };
 
             sampler2D _YPlane;
@@ -60,8 +59,6 @@ Shader "Resources/Shaders/Vlahos_Left_Depth"
             float4 _UPlane_ST;
             sampler2D _VPlane;
             float4 _VPlane_ST;
-            //sampler2D _DepthPlane;
-            //float4 _DepthPlane_ST;
 
             float _a1;
             float _a2;
@@ -78,7 +75,6 @@ Shader "Resources/Shaders/Vlahos_Left_Depth"
                 o.uv = TRANSFORM_TEX(v.uv, _YPlane);
                 o.uv = TRANSFORM_TEX(v.uv, _UPlane);
                 o.uv = TRANSFORM_TEX(v.uv, _VPlane);
-                //o.uv2 = TRANSFORM_TEX(v.uv, _DepthPlane);
                 UNITY_TRANSFER_FOG(o, o.vertex);
 
                 o.uv.y = 1 - v.uv.y;
@@ -106,7 +102,6 @@ Shader "Resources/Shaders/Vlahos_Left_Depth"
 
                     fragOutput o;
 
-                    //fixed4 depthBack = tex2D(_DepthPlane, i.uv2);
 
                     half3 yuv;
                     yuv.x = tex2D(_YPlane, i.uv);
@@ -115,26 +110,20 @@ Shader "Resources/Shaders/Vlahos_Left_Depth"
 
                     float alpha = 1;
 
-                    // sample the texture
                     fixed3 rgb = yuv2rgb(yuv);
                     fixed4 col = fixed4(rgb[0], rgb[1], rgb[2], 1);
 
                     if (unity_StereoEyeIndex == 0) {
 
-                        //https://smirnov-am.github.io/chromakeying/
                         alpha = 1 - _a1 * (col[1] - _a2 * col[2]);
                         o.color = fixed4(col[0], col[1], col[2], alpha);
-                        //if(alpha>0.1) o.depth = depthBack[0];
-                        //o.depth = alpha * depthBack[0];
                         return o;
                     }
                     else {
                         o.color = fixed4(0, 0, 0, 0);
-                        //o.depth = 0;
                         return o;
                     }
 
-                    //o.depth = (log(c * i.position.z + 1) / log(c * far + 1) * i.position.w);
 
                     return o;
                 }
@@ -142,78 +131,6 @@ Shader "Resources/Shaders/Vlahos_Left_Depth"
             }
         }
 
-        /*SubShader
-        {
-            Blend SrcAlpha OneMinusSrcAlpha
-
-         Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent"}
-         LOD 200
-
-         CGPROGRAM
-            // Physically based Standard lighting model, and enable shadows on all light types
-            #pragma surface surf Standard fullforwardshadows alpha:fade
-
-            // Use shader model 3.0 target, to get nicer looking lighting
-            #pragma target 3.0
-
-            sampler2D _YPlane;
-            float4 _YPlane_ST;
-            sampler2D _UPlane;
-            float4 _UPlane_ST;
-            sampler2D _VPlane;
-            float4 _VPlane_ST;;
-
-            struct Input {
-                float2 uv_YPlane;
-                float2 uv_UPlane;
-                float2 uv_VPlane;
-            };
-
-            half3 yuv2rgb(half3 yuv)
-            {
-                // The YUV to RBA conversion, please refer to: http://en.wikipedia.org/wiki/YUV
-                // Y'UV420p (I420) to RGB888 conversion section.
-                half y_value = yuv[0];
-                half u_value = yuv[1];
-                half v_value = yuv[2];
-                half r = y_value + 1.370705 * (v_value - 0.5);
-                half g = y_value - 0.698001 * (v_value - 0.5) - (0.337633 * (u_value - 0.5));
-                half b = y_value + 1.732446 * (u_value - 0.5);
-                return half3(r, g, b);
-            }
-
-            void surf(Input IN, inout SurfaceOutputStandard o) {
-                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-                
-                half3 yuv;
-                yuv.x = tex2D(_YPlane, IN.uv_YPlane);
-                yuv.y = tex2D(_UPlane, In.uv_UPlane);
-                yuv.z = tex2D(_VPlane, IN.uv_VPlane);
-
-                float alpha = 1;
-
-                // sample the texture
-                fixed3 rgb = yuv2rgb(yuv);
-                fixed4 col = fixed4(rgb[0], rgb[1], rgb[2], 1);
-
-                if (unity_StereoEyeIndex == 0) {
-
-                    //https://smirnov-am.github.io/chromakeying/
-                    alpha = 1 - _a1 * (col[1] - _a2 * col[2]);
-                    o.Albedo = fixed3(col[0], col[1], col[2]);
-                    o.Alpha = alpha;
-                    //if(alpha>0.1) o.depth = depthBack[0];
-                    //o.depth = alpha * depthBack[0];
-                    return o;
-                }
-                else {
-                    o.Albedo = fixed3(0, 0, 0);
-                    o.Alpha = 0;
-                    //o.depth = 0;
-                }
-            }
-            ENDCG
-        }*/
 
             FallBack "Transparent/Diffuse"
 }

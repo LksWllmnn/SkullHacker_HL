@@ -77,7 +77,6 @@ Shader "Unlit/Vlahos_Right_Depth"
                 o.uv2 = TRANSFORM_TEX(v.uv, _DepthPlane);
                 UNITY_TRANSFER_FOG(o, o.vertex);
 
-                //o.uv.y = 1 - v.uv.y;
                 o.uv.x = 1 - v.uv.x;
                 o.uv2.x = 1 - v.uv.x;
                 return o;
