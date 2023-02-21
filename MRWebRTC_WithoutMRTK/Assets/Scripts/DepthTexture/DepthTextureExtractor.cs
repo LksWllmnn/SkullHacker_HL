@@ -28,10 +28,10 @@ public class DepthTextureExtractor : MonoBehaviour
     {
         if(ShouldRenderDepth)
         {
-            if (!_isSettingDepth) StartCoroutine(GetDepthAsTexture());
-            /*_sendTex = ToTexture2D(RTex);
+            //if (!_isSettingDepth) StartCoroutine(GetDepthAsTexture());
+            _sendTex = ToTexture2D(RTex);
             JpgSample = _sendTex.EncodeToJPG();
-            _isSettingDepth = false;*/
+            _isSettingDepth = false;
         }
         
     }
