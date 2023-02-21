@@ -53,27 +53,22 @@ public class CalculateDistance : MonoBehaviour
             } else
             {
                 this.transform.parent = _originParent;
-                //Plane wird noch hinter die ausmaße der Objekts gesetzt, da das Objekt in 3d sonst immer so erscheint, als ob es leicht vor der tatsächlichen Position erscheint (Mathematik_und_Simulation_Kapitel-1.pdf, S.9/75)
+                //Plane is still placed behind the dimensions of the object, because otherwise the object in 3d always appears as if it appears slightly in front of the actual position (Mathematik_und_Simulation_Kapitel-1.pdf, p.9/75)
                 //if (!_isChecking) StartCoroutine(setNewOrientation());
 
                 CamPos = new Vector3(Mathf.Floor(Cam.position.x * 100) / 100, Mathf.Floor(Cam.position.y * 1000) / 1000, Mathf.Floor(Cam.position.z * 1000) / 1000);
                 this.transform.position = Object.position + (Vector3.Normalize(Object.position - Cam.position) * (Mathf.Sqrt(Object.localScale.x * Object.localScale.x + Object.localScale.y * Object.localScale.y + Object.localScale.z * Object.localScale.z) / 2));
                 this.transform.LookAt(CamPos);
 
-                //größe der plane anpassen anhand des abstands zum Objekt mithilfe der Kathete https://de.wikipedia.org/wiki/Rechtwinkliges_Dreieck und dann mal 2 da 2x rechtwinkliges dreieck ein gleichschenkliges ergeben
+                //Adjust the size of the plane based on the distance to the object using the cathetus https://de.wikipedia.org/wiki/Rechtwinkliges_Dreieck and then times 2 since 2x right triangles make an isosceles triangle
                 this.transform.localScale = origiScale * ScaleFactor * Mathf.Tan(Mathf.Deg2Rad * CamFovHor / 2);
-                //this.transform.localScale = origiScale * ScaleFactor * Mathf.Tan(43.0f * Mathf.PI / 180);
             }
         } else
         {
-            //Plane wird noch hinter die ausmaße der Objekts gesetzt, da das Objekt in 3d sonst immer so erscheint, als ob es leicht vor der tatsächlichen Position erscheint (Mathematik_und_Simulation_Kapitel-1.pdf, S.9/75)
-            //if (!_isChecking) StartCoroutine(setNewOrientation());
-
             CamPos = new Vector3(Mathf.Floor(Cam.position.x * 100) / 100, Mathf.Floor(Cam.position.y * 1000) / 1000, Mathf.Floor(Cam.position.z * 1000) / 1000);
             this.transform.position = Object.position + (Vector3.Normalize(Object.position - Cam.position) * (Mathf.Sqrt(Object.localScale.x * Object.localScale.x + Object.localScale.y * Object.localScale.y + Object.localScale.z * Object.localScale.z) / 2));
             this.transform.LookAt(CamPos);
 
-            //größe der plane anpassen anhand des abstands zum Objekt mithilfe der Kathete https://de.wikipedia.org/wiki/Rechtwinkliges_Dreieck und dann mal 2 da 2x rechtwinkliges dreieck ein gleichschenkliges ergeben
             this.transform.localScale = origiScale * ScaleFactor * Mathf.Tan(43.0f * Mathf.PI / 180);
         }
         
@@ -81,6 +76,7 @@ public class CalculateDistance : MonoBehaviour
 
     IEnumerator setNewOrientation()
     {
+        //Not in Use, because it causes flickering in the client scene
         _isChecking = true;
         yield return new WaitForSeconds(0.00f);
         CamPos = new Vector3(Mathf.Floor(Cam.position.x*100)/100, Mathf.Floor(Cam.position.y * 1000) / 1000, Mathf.Floor(Cam.position.z * 1000) / 1000);
